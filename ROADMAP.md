@@ -21,10 +21,12 @@ and export format may still evolve with documented migration paths.
 - Keep date keyboard shortcuts discoverable and aligned with form accessibility.
 - Keep trend range filters understandable as summaries, mosaic cells, recent
   entries, and copied reflections share the same selected window.
+- Keep first-time backup and restore guidance clear as import/export workflows
+  evolve.
 
 ## Next
 
-- Add clearer empty-state guidance for first-time backup and restore flows.
+- Add lightweight validation hints near the entry form before save attempts fail.
 - Add optional note prompts for users who want a little more reflection structure.
 - Add a small import dry-run example to the backup panel so first-time users can
   understand replacement counts before pasting their own data.
@@ -71,3 +73,6 @@ least two cadence reviews without major feature requests.
   date, or the selected calendar month.
 - Preview a candidate import with accepted entry count, issues, date range,
   replacement count, and new-date count before any saved browser data changes.
+- Show first-time backup guidance when there are no saved entries, switch to an
+  export-ready entry count once data exists, and keep restore safety guidance
+  associated with the import controls.

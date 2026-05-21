@@ -118,7 +118,7 @@ h2 {
 
 .entry-panel,
 .mosaic-panel,
-.backup-panel > div {
+.backup-panel > section {
   border: 1px solid #d7d3c8;
   border-radius: 8px;
   background: #ffffff;
@@ -307,6 +307,11 @@ textarea {
 
 .backup-panel textarea {
   margin-top: 12px;
+}
+
+.backup-guidance {
+  color: #5b675d;
+  margin-bottom: 14px;
 }
 
 .import-preview {
