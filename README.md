@@ -18,6 +18,8 @@ turns small daily entries into a readable calendar mosaic and short summary.
 - Add or update one entry per selected date with mood, energy, focus, and a short note.
 - See a sorted color mosaic, weekly-style averages, mood counts, and streaks.
 - Review recent entries in a compact keyboard-friendly list and jump straight into editing.
+- Use date shortcuts in the entry form: `T` for today, `[` for the previous saved date,
+  and `]` for the next saved date.
 - Copy a concise reflection summary for a journal, coach, or check-in.
 - Export JSON backups and preview imports before replacing browser data.
 - Validate entries and imports without crashing on invalid or legacy data.
@@ -42,7 +44,9 @@ npm run dev
 Open the local URL printed by Vite. Pick today's date or an older entry date,
 add mood, energy, focus, and note details, then use the mosaic and summary
 panels to review recent patterns. Use the Recent entries list to load a recent
-day back into the form without using the date picker.
+day back into the form without using the date picker. Keyboard users can press
+`T` to jump to today, `[` to move to the previous saved date, and `]` to move to
+the next saved date when they are not typing in a field.
 
 ## Examples
 
@@ -69,7 +73,8 @@ Example backup:
 ```
 
 Example review flow: save several days, tab to Recent entries, then use an
-Edit button to load that date's mood, energy, focus, and note into the form.
+Edit button or the `[` and `]` shortcuts to load a date's mood, energy, focus,
+and note into the form.
 
 ## Configuration
 
@@ -98,7 +103,8 @@ analytics in `src/summary.ts`, storage in `src/storage.ts`, and the React UI in
 Tests cover validation and upsert behavior, recent-entry sorting and limits,
 analytics and mosaic sorting, storage import/export handling, import previews,
 legacy schema normalization, date-based editing, and UI smoke flows. Write tests
-before changing behavior.
+before changing behavior. Date shortcut behavior is covered by pure helper tests
+plus a UI status update test.
 
 ## Roadmap
 

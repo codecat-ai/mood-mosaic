@@ -69,6 +69,7 @@ button.primary {
 
 h1,
 h2,
+h3,
 p {
   margin-top: 0;
 }
@@ -207,6 +208,26 @@ textarea {
 
 .summary-metric strong {
   font-size: 1.35rem;
+}
+
+.shortcut-help {
+  border-top: 1px solid #d7d3c8;
+  color: #344036;
+  margin-top: 18px;
+  padding-top: 14px;
+}
+
+.shortcut-help h3 {
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.shortcut-help ul {
+  display: grid;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .mood-counts {
