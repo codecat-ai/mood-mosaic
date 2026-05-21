@@ -22,7 +22,7 @@ turns small daily entries into a readable calendar mosaic and short summary.
 - Use date shortcuts in the entry form: `T` for today, `[` for the previous saved date,
   and `]` for the next saved date.
 - Copy a concise reflection summary for a journal, coach, or check-in.
-- Export JSON backups and preview imports before replacing browser data.
+- Export JSON backups with first-time guidance and preview imports before replacing browser data.
 - Validate entries and imports without crashing on invalid or legacy data.
 - Run fully client-side after a production build.
 
@@ -84,9 +84,11 @@ shortcuts to load a date's mood, energy, focus, and note into the form.
 
 There is no account, server, or cloud configuration. Data is stored in browser
 LocalStorage under `mood-mosaic:journal`. Export JSON regularly if you want a
-portable backup or need to move browsers. Imports show a preview first with the
-accepted entry count, date range, issues, and replacement/addition counts before
-you confirm the browser data replacement.
+portable backup or need to move browsers. When there are no saved entries, the
+backup panel explains that an export is not meaningful until an entry is saved.
+Imports show concise restore guidance and a preview first with the accepted
+entry count, date range, issues, and replacement/addition counts before you
+confirm the browser data replacement.
 
 ## Development
 

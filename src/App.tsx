@@ -60,6 +60,12 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
   const cells = buildMosaicCells(trendEntries);
   const copySummary = createCopySummary(trendEntries);
   const recentEntries = getRecentEntries(trendEntries);
+  const backupGuidance =
+    entries.length === 0
+      ? 'Save an entry before exporting a meaningful JSON backup. Empty exports are only useful for checking the file shape.'
+      : `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} ready to export.`;
+  const importGuidance =
+    'Preview import safely before replacement. Browser data is not changed until you confirm.';
 
   const selectEntryDate = useCallback(
     (date: string, nextStatus?: string) => {
@@ -364,8 +370,11 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
       </section>
 
       <section className="backup-panel" aria-label="Backup and import">
-        <div>
-          <h2>Backup</h2>
+        <section aria-labelledby="backup-heading">
+          <h2 id="backup-heading">Backup</h2>
+          <p className="backup-guidance" id="backup-guidance">
+            {backupGuidance}
+          </p>
           <div className="button-row">
             <button type="button" onClick={exportJson}>
               Export JSON
@@ -373,18 +382,23 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
           </div>
           <textarea
             aria-label="Exported JSON"
+            aria-describedby="backup-guidance"
             readOnly
             value={exportSource}
             placeholder="Exported JSON appears here"
             rows={8}
           />
-        </div>
+        </section>
 
-        <div>
-          <h2>Import</h2>
+        <section aria-labelledby="import-heading">
+          <h2 id="import-heading">Import</h2>
+          <p className="backup-guidance" id="import-guidance">
+            {importGuidance}
+          </p>
           <label>
             Import JSON
             <textarea
+              aria-describedby="import-guidance"
               value={importSource}
               onChange={(event) => {
                 setImportSource(event.target.value);
@@ -436,7 +450,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
               ) : null}
             </div>
           ) : null}
-        </div>
+        </section>
       </section>
 
       <p className="status" role="status" aria-live="polite">

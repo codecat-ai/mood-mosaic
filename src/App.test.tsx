@@ -128,7 +128,7 @@ describe('App', () => {
       '2026-05-19: reflective, energy 2, focus 3',
       '2026-05-21: bright, energy 5, focus 4'
     ]);
-    expect(screen.getByText(/2 entries/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/journal snapshot/i)).toHaveTextContent(/2 entries/i);
   });
 
   it('rejects an empty selected date without corrupting saved entries', () => {
@@ -199,6 +199,50 @@ describe('App', () => {
 
     expect(screen.getByRole('region', { name: /recent entries/i })).toHaveTextContent(
       /save an entry to review and edit recent days here/i
+    );
+  });
+
+  it('guides first-time backup and restore flows before any entries exist', () => {
+    render(<App storageTarget={window.localStorage} today="2026-05-21" />);
+
+    expect(screen.getByRole('region', { name: 'Backup' })).toHaveTextContent(
+      /save an entry before exporting a meaningful json backup/i
+    );
+    expect(screen.getByLabelText(/exported json/i)).toHaveAccessibleDescription(
+      /save an entry before exporting a meaningful json backup/i
+    );
+    expect(screen.getByRole('region', { name: 'Import' })).toHaveTextContent(
+      /preview import safely before replacement/i
+    );
+    expect(screen.getByRole('region', { name: 'Import' })).toHaveTextContent(
+      /browser data is not changed until you confirm/i
+    );
+    expect(screen.getByLabelText(/import json/i)).toHaveAccessibleDescription(
+      /browser data is not changed until you confirm/i
+    );
+  });
+
+  it('shows backup export readiness after entries exist while keeping concise import safety guidance', () => {
+    seedEntries([
+      {
+        date: '2026-05-21',
+        mood: 'focused',
+        energy: 5,
+        focus: 4,
+        note: 'Ready to back up',
+        schemaVersion: 1
+      }
+    ]);
+
+    render(<App storageTarget={window.localStorage} today="2026-05-21" />);
+
+    const backup = screen.getByRole('region', { name: 'Backup' });
+    expect(backup).toHaveTextContent(/1 entry ready to export/i);
+    expect(backup).not.toHaveTextContent(
+      /save an entry before exporting a meaningful json backup/i
+    );
+    expect(screen.getByRole('region', { name: 'Import' })).toHaveTextContent(
+      /browser data is not changed until you confirm/i
     );
   });
 
