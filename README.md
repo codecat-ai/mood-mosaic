@@ -17,6 +17,7 @@ turns small daily entries into a readable calendar mosaic and short summary.
 
 - Add or update one entry per selected date with mood, energy, focus, and a short note.
 - See a sorted color mosaic, weekly-style averages, mood counts, and streaks.
+- Review recent entries in a compact keyboard-friendly list and jump straight into editing.
 - Copy a concise reflection summary for a journal, coach, or check-in.
 - Export JSON backups and preview imports before replacing browser data.
 - Validate entries and imports without crashing on invalid or legacy data.
@@ -27,7 +28,7 @@ turns small daily entries into a readable calendar mosaic and short summary.
 Mood Mosaic is not published to a package registry. Use a source checkout:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/codecat-ai/mood-mosaic.git
 cd mood-mosaic
 npm ci
 ```
@@ -40,7 +41,8 @@ npm run dev
 
 Open the local URL printed by Vite. Pick today's date or an older entry date,
 add mood, energy, focus, and note details, then use the mosaic and summary
-panels to review recent patterns.
+panels to review recent patterns. Use the Recent entries list to load a recent
+day back into the form without using the date picker.
 
 ## Examples
 
@@ -66,6 +68,9 @@ Example backup:
 }
 ```
 
+Example review flow: save several days, tab to Recent entries, then use an
+Edit button to load that date's mood, energy, focus, and note into the form.
+
 ## Configuration
 
 There is no account, server, or cloud configuration. Data is stored in browser
@@ -83,15 +88,17 @@ npm test -- --run
 npm run build
 ```
 
-The core model lives in `src/journal.ts`, import preview logic in
-`src/importPreview.ts`, analytics in `src/summary.ts`, storage in
-`src/storage.ts`, and the React UI in `src/App.tsx`.
+The core model lives in `src/journal.ts`, recent-entry selection in
+`src/recentEntries.ts`, import preview logic in `src/importPreview.ts`,
+analytics in `src/summary.ts`, storage in `src/storage.ts`, and the React UI in
+`src/App.tsx`.
 
 ## Testing
 
-Tests cover validation and upsert behavior, analytics and mosaic sorting,
-storage import/export handling, import previews, legacy schema normalization,
-date-based editing, and UI smoke flows. Write tests before changing behavior.
+Tests cover validation and upsert behavior, recent-entry sorting and limits,
+analytics and mosaic sorting, storage import/export handling, import previews,
+legacy schema normalization, date-based editing, and UI smoke flows. Write tests
+before changing behavior.
 
 ## Roadmap
 

@@ -17,11 +17,12 @@ and export format may still evolve with documented migration paths.
 - Refine visual density for students, makers, and remote work check-ins.
 - Support date-based entry editing for adding or revising older journal days.
 - Maintain import previews before browser data replacement.
+- Keep the compact recent-entry list accessible as review workflows evolve.
 
 ## Next
 
 - Add lightweight trend filters by week or month.
-- Add a compact recent-entry list for keyboard-friendly review and quick editing.
+- Add keyboard shortcuts for jumping to today and moving between saved entry dates.
 - Add clearer empty-state guidance for first-time backup and restore flows.
 
 ## Later
@@ -57,5 +58,7 @@ least two cadence reviews without major feature requests.
   sorted by date.
 - Reject empty or invalid selected dates with status text before storage is
   changed.
+- Review recent entries in newest-first order, including mood, energy, focus,
+  and note previews, then use an Edit button to load that date into the form.
 - Preview a candidate import with accepted entry count, issues, date range,
   replacement count, and new-date count before any saved browser data changes.

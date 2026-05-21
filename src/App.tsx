@@ -7,6 +7,7 @@ import {
   type JournalEntry
 } from './journal';
 import { previewJournalImport, type ImportPreview } from './importPreview';
+import { getRecentEntries } from './recentEntries';
 import { buildMosaicCells, buildSummary, createCopySummary } from './summary';
 import { createJournalStorage } from './storage';
 import './styles.css';
@@ -44,6 +45,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
   const summary = buildSummary(entries);
   const cells = buildMosaicCells(entries);
   const copySummary = createCopySummary(entries);
+  const recentEntries = getRecentEntries(entries);
 
   function selectEntryDate(date: string) {
     setSelectedDate(date);
@@ -251,6 +253,35 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
               </span>
             ))}
           </div>
+
+          <section className="recent-entries" aria-labelledby="recent-entries-heading">
+            <h2 id="recent-entries-heading">Recent entries</h2>
+            {recentEntries.length === 0 ? (
+              <p className="empty-state">Save an entry to review and edit recent days here.</p>
+            ) : (
+              <ul>
+                {recentEntries.map((entry) => (
+                  <li key={entry.date}>
+                    <div>
+                      <strong>{entry.date}</strong>
+                      <span>{entry.mood}</span>
+                      <span>
+                        Energy {entry.energy}, Focus {entry.focus}
+                      </span>
+                      {entry.note ? <p>{previewNote(entry.note)}</p> : null}
+                    </div>
+                    <button
+                      type="button"
+                      aria-label={`Edit ${entry.date}`}
+                      onClick={() => selectEntryDate(entry.date)}
+                    >
+                      Edit
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         </section>
       </section>
 
@@ -359,6 +390,10 @@ function formFromEntry(entries: JournalEntry[], date: string): FormState {
 
 function entryForDate(entries: JournalEntry[], date: string): JournalEntry | undefined {
   return entries.find((entry) => entry.date === date);
+}
+
+function previewNote(note: string): string {
+  return note.length > 96 ? `${note.slice(0, 93)}...` : note;
 }
 
 function currentDate(): string {
