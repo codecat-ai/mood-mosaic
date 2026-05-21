@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildMosaicCells, buildSummary, createCopySummary } from './summary';
+import { buildMosaicCells, buildSummary, createCopySummary, filterEntriesByTrend } from './summary';
 import { CURRENT_SCHEMA_VERSION, type JournalEntry } from './journal';
 
 const entries: JournalEntry[] = [
@@ -65,4 +65,86 @@ describe('summary analytics', () => {
     expect(copy).not.toContain('null');
     expect(copy.length).toBeLessThan(700);
   });
+
+  it('returns all-time entries in summary sort order with a clear label', () => {
+    const trend = filterEntriesByTrend(entries, 'all', '2026-05-21');
+
+    expect(trend.entries.map((entry) => entry.date)).toEqual([
+      '2026-05-19',
+      '2026-05-20',
+      '2026-05-21'
+    ]);
+    expect(trend.label).toBe('All time');
+    expect(trend.countLabel).toBe('3 entries');
+  });
+
+  it('filters the Monday-Sunday week containing the anchor date', () => {
+    const trend = filterEntriesByTrend(
+      [
+        entry('2026-05-17', 'previous Sunday'),
+        entry('2026-05-18', 'week Monday'),
+        entry('2026-05-21', 'anchor Thursday'),
+        entry('2026-05-24', 'week Sunday'),
+        entry('2026-05-25', 'next Monday')
+      ],
+      'week',
+      '2026-05-21'
+    );
+
+    expect(trend.entries.map((item) => item.date)).toEqual([
+      '2026-05-18',
+      '2026-05-21',
+      '2026-05-24'
+    ]);
+    expect(trend.label).toBe('This week: 2026-05-18 to 2026-05-24');
+    expect(trend.countLabel).toBe('3 entries');
+  });
+
+  it('filters the calendar month containing the anchor date', () => {
+    const trend = filterEntriesByTrend(
+      [
+        entry('2026-04-30'),
+        entry('2026-05-01'),
+        entry('2026-05-21'),
+        entry('2026-05-31'),
+        entry('2026-06-01')
+      ],
+      'month',
+      '2026-05-21'
+    );
+
+    expect(trend.entries.map((item) => item.date)).toEqual([
+      '2026-05-01',
+      '2026-05-21',
+      '2026-05-31'
+    ]);
+    expect(trend.label).toBe('This month: May 2026');
+    expect(trend.countLabel).toBe('3 entries');
+  });
+
+  it('handles empty matching windows and invalid anchors without crashing', () => {
+    const emptyWeek = filterEntriesByTrend(entries, 'week', '2026-06-04');
+    const invalidAnchor = filterEntriesByTrend(entries, 'week', 'not-a-date');
+
+    expect(emptyWeek.entries).toEqual([]);
+    expect(emptyWeek.label).toBe('This week: 2026-06-01 to 2026-06-07');
+    expect(emptyWeek.countLabel).toBe('No entries');
+    expect(invalidAnchor.entries.map((entry) => entry.date)).toEqual([
+      '2026-05-19',
+      '2026-05-20',
+      '2026-05-21'
+    ]);
+    expect(invalidAnchor.label).toBe('All time');
+  });
 });
+
+function entry(date: string, note = 'Note'): JournalEntry {
+  return {
+    date,
+    mood: 'calm',
+    energy: 3,
+    focus: 3,
+    note,
+    schemaVersion: CURRENT_SCHEMA_VERSION
+  };
+}

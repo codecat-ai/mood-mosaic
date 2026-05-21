@@ -1,5 +1,5 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 
 describe('App', () => {
@@ -199,6 +199,94 @@ describe('App', () => {
 
     expect(screen.getByRole('region', { name: /recent entries/i })).toHaveTextContent(
       /save an entry to review and edit recent days here/i
+    );
+  });
+
+  it('filters trend artifacts by the selected week and keeps copied summaries aligned', async () => {
+    const clipboardWrite = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText: clipboardWrite } });
+    seedEntries([
+      {
+        date: '2026-05-17',
+        mood: 'stressed',
+        energy: 1,
+        focus: 1,
+        note: 'Previous week',
+        schemaVersion: 1
+      },
+      {
+        date: '2026-05-18',
+        mood: 'steady',
+        energy: 2,
+        focus: 2,
+        note: 'Week start',
+        schemaVersion: 1
+      },
+      {
+        date: '2026-05-21',
+        mood: 'focused',
+        energy: 5,
+        focus: 4,
+        note: 'Anchor week',
+        schemaVersion: 1
+      },
+      {
+        date: '2026-05-25',
+        mood: 'bright',
+        energy: 5,
+        focus: 5,
+        note: 'Next week',
+        schemaVersion: 1
+      }
+    ]);
+
+    render(<App storageTarget={window.localStorage} today="2026-05-21" />);
+    fireEvent.change(screen.getByLabelText(/trend range/i), { target: { value: 'week' } });
+
+    expect(screen.getByLabelText(/journal snapshot/i)).toHaveTextContent(/2 entries/i);
+    expect(screen.getByText(/this week: 2026-05-18 to 2026-05-24/i)).toBeInTheDocument();
+    expect(screen.getByTitle(/2026-05-18: steady/i)).toBeInTheDocument();
+    expect(screen.getByTitle(/2026-05-21: focused/i)).toBeInTheDocument();
+    expect(screen.queryByTitle(/2026-05-17: stressed/i)).not.toBeInTheDocument();
+    expect(screen.queryByTitle(/2026-05-25: bright/i)).not.toBeInTheDocument();
+    expect(screen.getByRole('region', { name: /recent entries/i })).toHaveTextContent(
+      /anchor week/i
+    );
+    expect(screen.getByRole('region', { name: /recent entries/i })).not.toHaveTextContent(
+      /next week/i
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /copy summary/i }));
+    });
+    expect(clipboardWrite).toHaveBeenCalled();
+    expect(clipboardWrite.mock.calls[0][0]).toContain('2 entries');
+    expect(clipboardWrite.mock.calls[0][0]).toContain('Top moods: focused (1), steady (1)');
+    expect(clipboardWrite.mock.calls[0][0]).not.toContain('Previous week');
+    expect(clipboardWrite.mock.calls[0][0]).not.toContain('Next week');
+    await screen.findByText(/copied reflection summary/i);
+  });
+
+  it('shows useful empty trend labels when the selected window has no entries', () => {
+    seedEntries([
+      {
+        date: '2026-05-21',
+        mood: 'focused',
+        energy: 5,
+        focus: 4,
+        note: 'May entry',
+        schemaVersion: 1
+      }
+    ]);
+
+    render(<App storageTarget={window.localStorage} today="2026-06-10" />);
+    fireEvent.change(screen.getByLabelText(/trend range/i), { target: { value: 'month' } });
+
+    expect(screen.getByLabelText(/journal snapshot/i)).toHaveTextContent(/0 entries/i);
+    expect(screen.getByText(/this month: june 2026/i)).toBeInTheDocument();
+    expect(screen.getByText(/no entries in this month window/i)).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: /recent entries/i })).toHaveTextContent(
+      /no entries in this month window/i
     );
   });
 

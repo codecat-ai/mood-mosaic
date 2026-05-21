@@ -19,12 +19,15 @@ and export format may still evolve with documented migration paths.
 - Maintain import previews before browser data replacement.
 - Keep the compact recent-entry list accessible as review workflows evolve.
 - Keep date keyboard shortcuts discoverable and aligned with form accessibility.
+- Keep trend range filters understandable as summaries, mosaic cells, recent
+  entries, and copied reflections share the same selected window.
 
 ## Next
 
-- Add lightweight trend filters by week or month.
 - Add clearer empty-state guidance for first-time backup and restore flows.
 - Add optional note prompts for users who want a little more reflection structure.
+- Add a small import dry-run example to the backup panel so first-time users can
+  understand replacement counts before pasting their own data.
 
 ## Later
 
@@ -63,5 +66,8 @@ least two cadence reviews without major feature requests.
   and note previews, then use an Edit button to load that date into the form.
 - Use visible keyboard shortcuts to jump to today or move to the previous or
   next saved entry date, with live status text after the selected date changes.
+- Filter the journal snapshot, mosaic cells, recent entries, and copied
+  reflection summary by all time, the Monday-Sunday week containing the selected
+  date, or the selected calendar month.
 - Preview a candidate import with accepted entry count, issues, date range,
   replacement count, and new-date count before any saved browser data changes.

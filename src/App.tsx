@@ -13,7 +13,13 @@ import {
 } from './journal';
 import { previewJournalImport, type ImportPreview } from './importPreview';
 import { getRecentEntries } from './recentEntries';
-import { buildMosaicCells, buildSummary, createCopySummary } from './summary';
+import {
+  buildMosaicCells,
+  buildSummary,
+  createCopySummary,
+  filterEntriesByTrend,
+  type TrendFilterMode
+} from './summary';
 import { createJournalStorage } from './storage';
 import './styles.css';
 
@@ -39,6 +45,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
   const initial = useMemo(() => storage.load(), [storage]);
   const [entries, setEntries] = useState<JournalEntry[]>(initial.entries);
   const [selectedDate, setSelectedDate] = useState(today);
+  const [trendMode, setTrendMode] = useState<TrendFilterMode>('all');
   const [form, setForm] = useState<FormState>(() => formFromEntry(initial.entries, today));
   const [importSource, setImportSource] = useState('');
   const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
@@ -47,10 +54,12 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
     initial.issues.length > 0 ? `Loaded with issues: ${initial.issues.join(' ')}` : 'Ready'
   );
 
-  const summary = buildSummary(entries);
-  const cells = buildMosaicCells(entries);
-  const copySummary = createCopySummary(entries);
-  const recentEntries = getRecentEntries(entries);
+  const trend = filterEntriesByTrend(entries, trendMode, selectedDate);
+  const trendEntries = trend.entries;
+  const summary = buildSummary(trendEntries);
+  const cells = buildMosaicCells(trendEntries);
+  const copySummary = createCopySummary(trendEntries);
+  const recentEntries = getRecentEntries(trendEntries);
 
   const selectEntryDate = useCallback(
     (date: string, nextStatus?: string) => {
@@ -267,16 +276,33 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
           <div className="panel-heading">
             <div>
               <h2 id="mosaic-heading">Mosaic</h2>
-              <p>Recent pattern by date</p>
+              <p>Trend anchored to selected entry date {selectedDate || 'none'}.</p>
             </div>
             <button type="button" onClick={copyReflectionSummary}>
               Copy summary
             </button>
           </div>
 
+          <div className="trend-controls">
+            <label>
+              Trend range
+              <select
+                value={trendMode}
+                onChange={(event) => setTrendMode(event.target.value as TrendFilterMode)}
+              >
+                <option value="all">All time</option>
+                <option value="week">This week</option>
+                <option value="month">This month</option>
+              </select>
+            </label>
+            <p aria-live="polite">
+              {trend.label} - {trendStatusCount(trend.countLabel)}
+            </p>
+          </div>
+
           <div className="mosaic-grid" aria-label="Mood mosaic cells">
             {cells.length === 0 ? (
-              <p className="empty-state">No entries yet.</p>
+              <p className="empty-state">{emptyTrendMessage(trend.mode)}</p>
             ) : (
               cells.map((cell) => (
                 <div
@@ -309,7 +335,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
           <section className="recent-entries" aria-labelledby="recent-entries-heading">
             <h2 id="recent-entries-heading">Recent entries</h2>
             {recentEntries.length === 0 ? (
-              <p className="empty-state">Save an entry to review and edit recent days here.</p>
+              <p className="empty-state">{emptyRecentMessage(trend.mode)}</p>
             ) : (
               <ul>
                 {recentEntries.map((entry) => (
@@ -446,6 +472,42 @@ function entryForDate(entries: JournalEntry[], date: string): JournalEntry | und
 
 function previewNote(note: string): string {
   return note.length > 96 ? `${note.slice(0, 93)}...` : note;
+}
+
+function emptyTrendMessage(mode: TrendFilterMode): string {
+  if (mode === 'week') {
+    return 'No mosaic cells in this week window.';
+  }
+
+  if (mode === 'month') {
+    return 'No mosaic cells in this month window.';
+  }
+
+  return 'No entries yet.';
+}
+
+function emptyRecentMessage(mode: TrendFilterMode): string {
+  if (mode === 'week') {
+    return 'No entries in this week window.';
+  }
+
+  if (mode === 'month') {
+    return 'No entries in this month window.';
+  }
+
+  return 'Save an entry to review and edit recent days here.';
+}
+
+function trendStatusCount(countLabel: string): string {
+  if (countLabel === '1 entry') {
+    return '1 matching entry';
+  }
+
+  if (countLabel.endsWith(' entries')) {
+    return countLabel.replace(' entries', ' matching entries');
+  }
+
+  return countLabel;
 }
 
 function currentDate(): string {

@@ -1,4 +1,4 @@
-import { normalizeNote, type JournalEntry } from './journal';
+import { isValidEntryDate, normalizeNote, type JournalEntry } from './journal';
 
 export interface MosaicCell {
   date: string;
@@ -18,6 +18,16 @@ export interface JournalSummary {
   recentNotes: string[];
 }
 
+export type TrendFilterMode = 'all' | 'week' | 'month';
+
+export interface TrendFilterResult {
+  mode: TrendFilterMode;
+  anchorDate: string | null;
+  entries: JournalEntry[];
+  label: string;
+  countLabel: string;
+}
+
 export function buildMosaicCells(entries: readonly JournalEntry[]): MosaicCell[] {
   return [...entries]
     .sort((left, right) => left.date.localeCompare(right.date))
@@ -31,8 +41,32 @@ export function buildMosaicCells(entries: readonly JournalEntry[]): MosaicCell[]
     }));
 }
 
+export function filterEntriesByTrend(
+  entries: readonly JournalEntry[],
+  mode: TrendFilterMode,
+  anchorDate: string
+): TrendFilterResult {
+  const sorted = sortEntriesByDate(entries);
+
+  if (mode === 'all' || !isValidEntryDate(anchorDate)) {
+    return trendResult('all', null, sorted, 'All time');
+  }
+
+  if (mode === 'month') {
+    const monthKey = anchorDate.slice(0, 7);
+    const filtered = sorted.filter((entry) => entry.date.startsWith(monthKey));
+
+    return trendResult(mode, anchorDate, filtered, `This month: ${formatMonthLabel(anchorDate)}`);
+  }
+
+  const { start, end } = weekWindow(anchorDate);
+  const filtered = sorted.filter((entry) => entry.date >= start && entry.date <= end);
+
+  return trendResult(mode, anchorDate, filtered, `This week: ${start} to ${end}`);
+}
+
 export function buildSummary(entries: readonly JournalEntry[]): JournalSummary {
-  const sorted = [...entries].sort((left, right) => left.date.localeCompare(right.date));
+  const sorted = sortEntriesByDate(entries);
   const totalEntries = sorted.length;
   const energySum = sorted.reduce((sum, entry) => sum + entry.energy, 0);
   const focusSum = sorted.reduce((sum, entry) => sum + entry.focus, 0);
@@ -110,6 +144,72 @@ function calculateRecentStreak(sortedEntries: JournalEntry[]): number {
   }
 
   return streak;
+}
+
+function trendResult(
+  mode: TrendFilterMode,
+  anchorDate: string | null,
+  entries: JournalEntry[],
+  label: string
+): TrendFilterResult {
+  return {
+    mode,
+    anchorDate,
+    entries,
+    label,
+    countLabel: entries.length === 0 ? 'No entries' : `${entries.length} ${entryLabel(entries.length)}`
+  };
+}
+
+function sortEntriesByDate(entries: readonly JournalEntry[]): JournalEntry[] {
+  return [...entries].sort((left, right) => left.date.localeCompare(right.date));
+}
+
+function weekWindow(anchorDate: string): { start: string; end: string } {
+  const date = parseIsoDate(anchorDate);
+  const day = date.getUTCDay();
+  const daysAfterMonday = day === 0 ? 6 : day - 1;
+  const start = addDays(date, -daysAfterMonday);
+  const end = addDays(start, 6);
+
+  return {
+    start: formatIsoDate(start),
+    end: formatIsoDate(end)
+  };
+}
+
+function addDays(date: Date, days: number): Date {
+  const next = new Date(date);
+  next.setUTCDate(date.getUTCDate() + days);
+  return next;
+}
+
+function formatIsoDate(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function formatMonthLabel(anchorDate: string): string {
+  const [year, month] = anchorDate.split('-').map(Number);
+  const monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ];
+
+  return `${monthNames[month - 1]} ${year}`;
+}
+
+function entryLabel(count: number): string {
+  return count === 1 ? 'entry' : 'entries';
 }
 
 function parseIsoDate(value: string): Date {
