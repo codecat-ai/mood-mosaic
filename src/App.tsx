@@ -6,6 +6,7 @@ import {
   validateEntry,
   type JournalEntry
 } from './journal';
+import { previewJournalImport, type ImportPreview } from './importPreview';
 import { buildMosaicCells, buildSummary, createCopySummary } from './summary';
 import { createJournalStorage } from './storage';
 import './styles.css';
@@ -34,6 +35,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
   const [selectedDate, setSelectedDate] = useState(today);
   const [form, setForm] = useState<FormState>(() => formFromEntry(initial.entries, today));
   const [importSource, setImportSource] = useState('');
+  const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
   const [exportSource, setExportSource] = useState('');
   const [status, setStatus] = useState(
     initial.issues.length > 0 ? `Loaded with issues: ${initial.issues.join(' ')}` : 'Ready'
@@ -89,17 +91,24 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
     setStatus('Exported JSON backup.');
   }
 
-  function importJson() {
-    const result = storage.importJson(importSource);
+  function previewImport() {
+    const preview = previewJournalImport(importSource, entries);
 
-    if (!result.ok) {
-      setStatus(`Import failed: ${result.issues.join(' ')}`);
+    setImportPreview(preview);
+    setStatus(preview.summary);
+  }
+
+  function confirmImport() {
+    if (!importPreview?.canProceed) {
+      setStatus('Preview a valid import before confirming.');
       return;
     }
 
-    setEntries(result.entries);
-    setForm(formFromEntry(result.entries, selectedDate));
-    setStatus(`Imported ${result.entries.length} entries.`);
+    storage.save(importPreview.acceptedEntries);
+    setEntries(importPreview.acceptedEntries);
+    setForm(formFromEntry(importPreview.acceptedEntries, selectedDate));
+    setImportPreview(null);
+    setStatus(`Imported ${importPreview.acceptedEntryCount} entries.`);
   }
 
   async function copyReflectionSummary() {
@@ -268,14 +277,56 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
             Import JSON
             <textarea
               value={importSource}
-              onChange={(event) => setImportSource(event.target.value)}
+              onChange={(event) => {
+                setImportSource(event.target.value);
+                setImportPreview(null);
+              }}
               placeholder='{"entries":[...]}'
               rows={8}
             />
           </label>
-          <button type="button" onClick={importJson}>
-            Import
+          <button type="button" onClick={previewImport}>
+            Preview import
           </button>
+          {importPreview ? (
+            <div className="import-preview" aria-label="Import preview">
+              <p>{importPreview.summary}</p>
+              <dl>
+                <div>
+                  <dt>Accepted entries</dt>
+                  <dd>{importPreview.acceptedEntryCount}</dd>
+                </div>
+                <div>
+                  <dt>Date range</dt>
+                  <dd>
+                    {importPreview.dateRange
+                      ? `${importPreview.dateRange.start} to ${importPreview.dateRange.end}`
+                      : 'None'}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Replacing</dt>
+                  <dd>{importPreview.replaceCount}</dd>
+                </div>
+                <div>
+                  <dt>New dates</dt>
+                  <dd>{importPreview.addCount}</dd>
+                </div>
+              </dl>
+              {importPreview.issues.length > 0 ? (
+                <ul>
+                  {importPreview.issues.map((issue) => (
+                    <li key={issue}>{issue}</li>
+                  ))}
+                </ul>
+              ) : null}
+              {importPreview.canProceed ? (
+                <button type="button" className="primary" onClick={confirmImport}>
+                  Confirm import
+                </button>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </section>
 

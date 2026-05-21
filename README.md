@@ -18,7 +18,7 @@ turns small daily entries into a readable calendar mosaic and short summary.
 - Add or update one entry per selected date with mood, energy, focus, and a short note.
 - See a sorted color mosaic, weekly-style averages, mood counts, and streaks.
 - Copy a concise reflection summary for a journal, coach, or check-in.
-- Export and import JSON backups from the browser.
+- Export JSON backups and preview imports before replacing browser data.
 - Validate entries and imports without crashing on invalid or legacy data.
 - Run fully client-side after a production build.
 
@@ -70,7 +70,9 @@ Example backup:
 
 There is no account, server, or cloud configuration. Data is stored in browser
 LocalStorage under `mood-mosaic:journal`. Export JSON regularly if you want a
-portable backup or need to move browsers.
+portable backup or need to move browsers. Imports show a preview first with the
+accepted entry count, date range, issues, and replacement/addition counts before
+you confirm the browser data replacement.
 
 ## Development
 
@@ -81,14 +83,15 @@ npm test -- --run
 npm run build
 ```
 
-The core model lives in `src/journal.ts`, analytics in `src/summary.ts`, storage
-in `src/storage.ts`, and the React UI in `src/App.tsx`.
+The core model lives in `src/journal.ts`, import preview logic in
+`src/importPreview.ts`, analytics in `src/summary.ts`, storage in
+`src/storage.ts`, and the React UI in `src/App.tsx`.
 
 ## Testing
 
 Tests cover validation and upsert behavior, analytics and mosaic sorting,
-storage import/export handling, legacy schema normalization, date-based editing,
-and UI smoke flows. Write tests before changing behavior.
+storage import/export handling, import previews, legacy schema normalization,
+date-based editing, and UI smoke flows. Write tests before changing behavior.
 
 ## Roadmap
 

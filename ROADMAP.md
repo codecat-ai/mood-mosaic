@@ -16,12 +16,13 @@ and export format may still evolve with documented migration paths.
 - Improve keyboard and screen-reader ergonomics as real feedback arrives.
 - Refine visual density for students, makers, and remote work check-ins.
 - Support date-based entry editing for adding or revising older journal days.
+- Maintain import previews before browser data replacement.
 
 ## Next
 
-- Add import preview before replacing saved browser data.
 - Add lightweight trend filters by week or month.
 - Add a compact recent-entry list for keyboard-friendly review and quick editing.
+- Add clearer empty-state guidance for first-time backup and restore flows.
 
 ## Later
 
@@ -56,3 +57,5 @@ least two cadence reviews without major feature requests.
   sorted by date.
 - Reject empty or invalid selected dates with status text before storage is
   changed.
+- Preview a candidate import with accepted entry count, issues, date range,
+  replacement count, and new-date count before any saved browser data changes.
