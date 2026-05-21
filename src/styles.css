@@ -156,6 +156,23 @@ textarea {
   gap: 12px;
 }
 
+.form-hints {
+  border: 1px solid #d7d3c8;
+  border-radius: 8px;
+  background: #f6f4ee;
+  color: #344036;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+}
+
+.form-hints ul {
+  display: grid;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
 .panel-heading {
   display: flex;
   align-items: start;

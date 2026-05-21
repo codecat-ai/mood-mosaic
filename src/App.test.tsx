@@ -140,9 +140,38 @@ describe('App', () => {
     fireEvent.change(screen.getByLabelText(/entry date/i), { target: { value: '' } });
     fireEvent.click(screen.getByRole('button', { name: /save entry/i }));
 
-    expect(screen.getByRole('status')).toHaveTextContent(/choose a valid date/i);
+    expect(screen.getByRole('status', { name: /^app status$/i })).toHaveTextContent(
+      /choose a valid date/i
+    );
     expect(screen.getByTitle(/2026-05-21: calm/i)).toBeInTheDocument();
     expect(screen.queryByTitle(/^: /i)).not.toBeInTheDocument();
+  });
+
+  it('renders accessible entry validation hints before save validation fails', () => {
+    render(<App storageTarget={window.localStorage} today="2026-05-21" />);
+
+    expect(screen.queryByText(/choose energy from 1 to 5/i)).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(/^energy$/i), { target: { value: '' } });
+    fireEvent.change(screen.getByLabelText(/^focus$/i), { target: { value: '6' } });
+    fireEvent.change(screen.getByLabelText(/^note$/i), {
+      target: { value: 'x'.repeat(470) }
+    });
+
+    const hintRegion = screen.getByRole('status', { name: /entry validation hints/i });
+    expect(hintRegion).toHaveTextContent(/choose energy from 1 to 5/i);
+    expect(hintRegion).toHaveTextContent(/choose focus from 1 to 5/i);
+    expect(hintRegion).toHaveTextContent(/note is almost full: 10 characters left/i);
+    expect(screen.getByLabelText(/^energy$/i)).toHaveAccessibleDescription(
+      /choose energy from 1 to 5/i
+    );
+    expect(screen.getByLabelText(/^focus$/i)).toHaveAccessibleDescription(
+      /choose focus from 1 to 5/i
+    );
+    expect(screen.getByLabelText(/^note$/i)).toHaveAccessibleDescription(
+      /note is almost full: 10 characters left/i
+    );
+    expect(screen.getByRole('status', { name: /^app status$/i })).toHaveTextContent(/ready/i);
   });
 
   it('renders a compact recent entries list newest-first with note previews', () => {

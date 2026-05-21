@@ -23,13 +23,16 @@ and export format may still evolve with documented migration paths.
   entries, and copied reflections share the same selected window.
 - Keep first-time backup and restore guidance clear as import/export workflows
   evolve.
+- Keep lightweight entry-form validation hints aligned with save validation and
+  accessible field descriptions.
 
 ## Next
 
-- Add lightweight validation hints near the entry form before save attempts fail.
 - Add optional note prompts for users who want a little more reflection structure.
 - Add a small import dry-run example to the backup panel so first-time users can
   understand replacement counts before pasting their own data.
+- Add a clear unsaved-form reset action for returning the selected date to its
+  last saved entry values.
 
 ## Later
 
@@ -76,3 +79,6 @@ least two cadence reviews without major feature requests.
 - Show first-time backup guidance when there are no saved entries, switch to an
   export-ready entry count once data exists, and keep restore safety guidance
   associated with the import controls.
+- Show lightweight validation hints near the entry form for invalid selected
+  dates, unset mood values, unset or out-of-range energy/focus values, and notes
+  that are close to the saved-entry length limit before save attempts fail.
