@@ -16,7 +16,8 @@ turns small daily entries into a readable calendar mosaic and short summary.
 ## Features
 
 - Add or update one entry per selected date with mood, energy, focus, and a short note.
-- See a sorted color mosaic, weekly-style averages, mood counts, and streaks.
+- See a sorted color mosaic, averages, mood counts, and streaks for all time,
+  the selected Monday-Sunday week, or the selected calendar month.
 - Review recent entries in a compact keyboard-friendly list and jump straight into editing.
 - Use date shortcuts in the entry form: `T` for today, `[` for the previous saved date,
   and `]` for the next saved date.
@@ -43,10 +44,13 @@ npm run dev
 
 Open the local URL printed by Vite. Pick today's date or an older entry date,
 add mood, energy, focus, and note details, then use the mosaic and summary
-panels to review recent patterns. Use the Recent entries list to load a recent
-day back into the form without using the date picker. Keyboard users can press
-`T` to jump to today, `[` to move to the previous saved date, and `]` to move to
-the next saved date when they are not typing in a field.
+panels to review patterns. The Trend range control filters the snapshot,
+mosaic, recent entries, and copied summary to all time, the Monday-Sunday week
+containing the selected entry date, or the selected calendar month. Use the
+Recent entries list to load a recent day back into the form without using the
+date picker. Keyboard users can press `T` to jump to today, `[` to move to the
+previous saved date, and `]` to move to the next saved date when they are not
+typing in a field.
 
 ## Examples
 
@@ -72,9 +76,9 @@ Example backup:
 }
 ```
 
-Example review flow: save several days, tab to Recent entries, then use an
-Edit button or the `[` and `]` shortcuts to load a date's mood, energy, focus,
-and note into the form.
+Example review flow: save several days, pick This week or This month in Trend
+range, tab to Recent entries, then use an Edit button or the `[` and `]`
+shortcuts to load a date's mood, energy, focus, and note into the form.
 
 ## Configuration
 
@@ -95,16 +99,16 @@ npm run build
 
 The core model lives in `src/journal.ts`, recent-entry selection in
 `src/recentEntries.ts`, import preview logic in `src/importPreview.ts`,
-analytics in `src/summary.ts`, storage in `src/storage.ts`, and the React UI in
-`src/App.tsx`.
+analytics and trend filtering in `src/summary.ts`, storage in `src/storage.ts`,
+and the React UI in `src/App.tsx`.
 
 ## Testing
 
 Tests cover validation and upsert behavior, recent-entry sorting and limits,
 analytics and mosaic sorting, storage import/export handling, import previews,
-legacy schema normalization, date-based editing, and UI smoke flows. Write tests
-before changing behavior. Date shortcut behavior is covered by pure helper tests
-plus a UI status update test.
+legacy schema normalization, date-based editing, trend filtering, and UI smoke
+flows. Write tests before changing behavior. Date shortcut behavior is covered
+by pure helper tests plus a UI status update test.
 
 ## Roadmap
 

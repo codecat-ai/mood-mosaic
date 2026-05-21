@@ -175,6 +175,25 @@ textarea {
   margin: 18px 0;
 }
 
+.trend-controls {
+  align-items: end;
+  border-top: 1px solid #d7d3c8;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(180px, 240px) 1fr;
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.trend-controls label {
+  margin-bottom: 0;
+}
+
+.trend-controls p {
+  color: #5b675d;
+  margin: 0;
+}
+
 .mosaic-cell {
   aspect-ratio: 1;
   border: 1px solid color-mix(in srgb, var(--cell-color), #000 18%);
@@ -357,7 +376,8 @@ textarea {
 
   .rating-grid,
   .summary-grid,
-  .recent-entries li {
+  .recent-entries li,
+  .trend-controls {
     grid-template-columns: 1fr;
   }
 }
