@@ -144,4 +144,103 @@ describe('App', () => {
     expect(screen.getByTitle(/2026-05-21: calm/i)).toBeInTheDocument();
     expect(screen.queryByTitle(/^: /i)).not.toBeInTheDocument();
   });
+
+  it('renders a compact recent entries list newest-first with note previews', () => {
+    seedEntries([
+      {
+        date: '2026-05-19',
+        mood: 'steady',
+        energy: 2,
+        focus: 4,
+        note: 'Older note should appear last',
+        schemaVersion: 1
+      },
+      {
+        date: '2026-05-21',
+        mood: 'focused',
+        energy: 5,
+        focus: 5,
+        note: 'Finished the keyboard review workflow with enough detail to preview',
+        schemaVersion: 1
+      },
+      {
+        date: '2026-05-20',
+        mood: 'calm',
+        energy: 3,
+        focus: 2,
+        note: '',
+        schemaVersion: 1
+      }
+    ]);
+
+    render(<App storageTarget={window.localStorage} today="2026-05-21" />);
+
+    const recentEntries = within(
+      screen.getByRole('region', { name: /recent entries/i })
+    ).getAllByRole('listitem');
+
+    expect(recentEntries).toHaveLength(3);
+    expect(recentEntries.map((item) => within(item).getByText(/2026-05-/i).textContent)).toEqual([
+      '2026-05-21',
+      '2026-05-20',
+      '2026-05-19'
+    ]);
+    expect(recentEntries[0]).toHaveTextContent(/focused/i);
+    expect(recentEntries[0]).toHaveTextContent(/energy 5/i);
+    expect(recentEntries[0]).toHaveTextContent(/focus 5/i);
+    expect(recentEntries[0]).toHaveTextContent(
+      /finished the keyboard review workflow with enough detail to preview/i
+    );
+    expect(recentEntries[1]).not.toHaveTextContent(/note preview/i);
+  });
+
+  it('shows a helpful recent entries empty state', () => {
+    render(<App storageTarget={window.localStorage} today="2026-05-21" />);
+
+    expect(screen.getByRole('region', { name: /recent entries/i })).toHaveTextContent(
+      /save an entry to review and edit recent days here/i
+    );
+  });
+
+  it('loads an entry into the form and announces status from the recent edit button', () => {
+    seedEntries([
+      {
+        date: '2026-05-20',
+        mood: 'reflective',
+        energy: 2,
+        focus: 4,
+        note: 'Follow-up edits',
+        schemaVersion: 1
+      },
+      {
+        date: '2026-05-21',
+        mood: 'bright',
+        energy: 5,
+        focus: 3,
+        note: 'Today note',
+        schemaVersion: 1
+      }
+    ]);
+
+    render(<App storageTarget={window.localStorage} today="2026-05-21" />);
+
+    fireEvent.click(screen.getByRole('button', { name: /edit 2026-05-20/i }));
+
+    expect(screen.getByLabelText(/entry date/i)).toHaveValue('2026-05-20');
+    expect(screen.getByLabelText(/^mood$/i)).toHaveValue('reflective');
+    expect(screen.getByLabelText(/^energy$/i)).toHaveValue(2);
+    expect(screen.getByLabelText(/^focus$/i)).toHaveValue(4);
+    expect(screen.getByLabelText(/^note$/i)).toHaveValue('Follow-up edits');
+    expect(screen.getByRole('status')).toHaveTextContent(/loaded entry for 2026-05-20/i);
+  });
 });
+
+function seedEntries(entries: unknown[]) {
+  window.localStorage.setItem(
+    'mood-mosaic:journal',
+    JSON.stringify({
+      schemaVersion: 1,
+      entries
+    })
+  );
+}
