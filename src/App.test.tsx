@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import App from './App';
 
@@ -7,7 +7,7 @@ describe('App', () => {
     window.localStorage.clear();
   });
 
-  it('saves, exports, imports, and updates status text', () => {
+  it('saves, exports, previews imports, confirms replacement, and updates status text', () => {
     render(<App storageTarget={window.localStorage} today="2026-05-21" />);
 
     fireEvent.change(screen.getByLabelText(/^mood$/i), { target: { value: 'calm' } });
@@ -26,15 +26,39 @@ describe('App', () => {
       target: {
         value: JSON.stringify({
           entries: [
-            { date: '2026-05-20', mood: 'steady', energy: 3, focus: 3, note: 'Imported' }
+            { date: '2026-05-21', mood: 'steady', energy: 3, focus: 3, note: 'Imported' }
           ]
         })
       }
     });
-    fireEvent.click(screen.getByRole('button', { name: /import/i }));
+    fireEvent.click(screen.getByRole('button', { name: /preview import/i }));
+
+    expect(screen.getByRole('status')).toHaveTextContent(/ready to import 1 entry/i);
+    expect(
+      within(screen.getByLabelText(/import preview/i)).getByText(/1 existing date will be replaced/i)
+    ).toBeInTheDocument();
+    expect(screen.queryByTitle(/2026-05-21: steady/i)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /confirm import/i }));
 
     expect(screen.getByRole('status')).toHaveTextContent(/imported/i);
-    expect(screen.getByTitle(/2026-05-20: steady/i)).toBeInTheDocument();
+    expect(screen.getByTitle(/2026-05-21: steady/i)).toBeInTheDocument();
+  });
+
+  it('blocks import confirmation when preview cannot proceed', () => {
+    render(<App storageTarget={window.localStorage} today="2026-05-21" />);
+
+    fireEvent.change(screen.getByLabelText(/^note$/i), { target: { value: 'Keep me' } });
+    fireEvent.click(screen.getByRole('button', { name: /save entry for 2026-05-21/i }));
+
+    fireEvent.change(screen.getByLabelText(/import json/i), {
+      target: { value: '{nope' }
+    });
+    fireEvent.click(screen.getByRole('button', { name: /preview import/i }));
+
+    expect(screen.getByRole('status')).toHaveTextContent(/import cannot proceed/i);
+    expect(screen.queryByRole('button', { name: /confirm import/i })).not.toBeInTheDocument();
+    expect(screen.getByTitle(/2026-05-21: calm/i)).toBeInTheDocument();
   });
 
   it('defaults the editable entry date to today and announces the selected date', () => {

@@ -225,6 +225,40 @@ textarea {
   margin-top: 12px;
 }
 
+.import-preview {
+  border: 1px solid #d7d3c8;
+  border-radius: 8px;
+  background: #f6f4ee;
+  margin-top: 14px;
+  padding: 14px;
+}
+
+.import-preview p {
+  margin-top: 0;
+}
+
+.import-preview dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.import-preview dt {
+  color: #5b675d;
+  font-size: 0.88rem;
+}
+
+.import-preview dd {
+  font-weight: 700;
+  margin: 0;
+}
+
+.import-preview ul {
+  color: #6b2d1f;
+  padding-left: 1.2rem;
+}
+
 .empty-state {
   color: #5b675d;
   grid-column: 1 / -1;

@@ -4,6 +4,7 @@ import {
   type JournalDocument,
   type JournalEntry
 } from './journal';
+import { previewJournalImport } from './importPreview';
 
 export const STORAGE_KEY = 'mood-mosaic:journal';
 
@@ -40,14 +41,15 @@ export function createJournalStorage(target: Storage, key = STORAGE_KEY): Journa
       return JSON.stringify(createJournalDocument(loaded.entries), null, 2);
     },
     importJson(source) {
-      const parsed = parseJournal(source);
+      const current = this.load().entries;
+      const preview = previewJournalImport(source, current);
 
-      if (parsed.issues.length > 0) {
-        return { ok: false, issues: parsed.issues };
+      if (!preview.canProceed) {
+        return { ok: false, issues: preview.issues };
       }
 
-      this.save(parsed.entries);
-      return { ok: true, entries: parsed.entries };
+      this.save(preview.acceptedEntries);
+      return { ok: true, entries: preview.acceptedEntries };
     }
   };
 }
@@ -61,21 +63,11 @@ function parseJournal(source: string): LoadResult {
     return { entries: [], issues: ['Import must be valid JSON.'] };
   }
 
-  if (!isRecord(parsed)) {
-    return { entries: [], issues: ['Import must be a JSON object.'] };
+  if (!isRecord(parsed) || !Array.isArray(parsed.entries)) {
+    return { entries: [], issues: ['Import must be a JSON object with an entries array.'] };
   }
 
-  const entriesSource = Array.isArray(parsed.entries)
-    ? parsed.entries
-    : Array.isArray(parsed)
-      ? parsed
-      : undefined;
-
-  if (!entriesSource) {
-    return { entries: [], issues: ['Import must include an entries array.'] };
-  }
-
-  const normalized = normalizeEntries(entriesSource);
+  const normalized = normalizeEntries(parsed.entries);
   return { entries: normalized.entries, issues: normalized.issues };
 }
 
