@@ -233,6 +233,42 @@ describe('App', () => {
     expect(screen.getByLabelText(/^note$/i)).toHaveValue('Follow-up edits');
     expect(screen.getByRole('status')).toHaveTextContent(/loaded entry for 2026-05-20/i);
   });
+
+  it('shows date shortcut help and announces a shortcut date change', () => {
+    seedEntries([
+      {
+        date: '2026-05-19',
+        mood: 'reflective',
+        energy: 2,
+        focus: 4,
+        note: 'Earlier note',
+        schemaVersion: 1
+      },
+      {
+        date: '2026-05-21',
+        mood: 'bright',
+        energy: 5,
+        focus: 3,
+        note: 'Today note',
+        schemaVersion: 1
+      }
+    ]);
+
+    render(<App storageTarget={window.localStorage} today="2026-05-21" />);
+
+    expect(screen.getByText(/shortcuts/i)).toBeInTheDocument();
+    expect(screen.getByText(/t: today/i)).toBeInTheDocument();
+    expect(screen.getByText(/\[: previous saved date/i)).toBeInTheDocument();
+    expect(screen.getByText(/\]: next saved date/i)).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(/entry date/i), { target: { value: '2026-05-21' } });
+    fireEvent.keyDown(window, { key: '[' });
+
+    expect(screen.getByLabelText(/entry date/i)).toHaveValue('2026-05-19');
+    expect(screen.getByRole('status')).toHaveTextContent(
+      /shortcut moved to previous saved date, 2026-05-19/i
+    );
+  });
 });
 
 function seedEntries(entries: unknown[]) {

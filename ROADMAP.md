@@ -18,12 +18,13 @@ and export format may still evolve with documented migration paths.
 - Support date-based entry editing for adding or revising older journal days.
 - Maintain import previews before browser data replacement.
 - Keep the compact recent-entry list accessible as review workflows evolve.
+- Keep date keyboard shortcuts discoverable and aligned with form accessibility.
 
 ## Next
 
 - Add lightweight trend filters by week or month.
-- Add keyboard shortcuts for jumping to today and moving between saved entry dates.
 - Add clearer empty-state guidance for first-time backup and restore flows.
+- Add optional note prompts for users who want a little more reflection structure.
 
 ## Later
 
@@ -60,5 +61,7 @@ least two cadence reviews without major feature requests.
   changed.
 - Review recent entries in newest-first order, including mood, energy, focus,
   and note previews, then use an Edit button to load that date into the form.
+- Use visible keyboard shortcuts to jump to today or move to the previous or
+  next saved entry date, with live status text after the selected date changes.
 - Preview a candidate import with accepted entry count, issues, date range,
   replacement count, and new-date count before any saved browser data changes.

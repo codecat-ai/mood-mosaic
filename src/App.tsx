@@ -1,4 +1,9 @@
-import { useMemo, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
+import {
+  resolveDateShortcut,
+  resolveShortcutDate,
+  type DateShortcutAction
+} from './dateShortcuts';
 import {
   CURRENT_SCHEMA_VERSION,
   isValidEntryDate,
@@ -47,19 +52,57 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
   const copySummary = createCopySummary(entries);
   const recentEntries = getRecentEntries(entries);
 
-  function selectEntryDate(date: string) {
-    setSelectedDate(date);
+  const selectEntryDate = useCallback(
+    (date: string, nextStatus?: string) => {
+      setSelectedDate(date);
 
-    if (!isValidEntryDate(date)) {
-      setStatus('Choose a valid date before saving this entry.');
-      return;
+      if (!isValidEntryDate(date)) {
+        setStatus('Choose a valid date before saving this entry.');
+        return;
+      }
+
+      setForm(formFromEntry(entries, date));
+      setStatus(
+        nextStatus ??
+          (entryForDate(entries, date) ? `Loaded entry for ${date}.` : `Editing entry for ${date}.`)
+      );
+    },
+    [entries]
+  );
+
+  useEffect(() => {
+    function handleDateShortcut(event: KeyboardEvent) {
+      const action = resolveDateShortcut({
+        key: event.key,
+        ctrlKey: event.ctrlKey,
+        metaKey: event.metaKey,
+        altKey: event.altKey,
+        target: shortcutTargetFromEvent(event.target)
+      });
+
+      if (!action) {
+        return;
+      }
+
+      const nextDate = resolveShortcutDate(
+        action,
+        selectedDate,
+        entries.map((entry) => entry.date),
+        today
+      );
+
+      if (nextDate === selectedDate) {
+        setStatus(noShortcutNeighborStatus(action));
+        return;
+      }
+
+      event.preventDefault();
+      selectEntryDate(nextDate, shortcutStatus(action, nextDate));
     }
 
-    setForm(formFromEntry(entries, date));
-    setStatus(
-      entryForDate(entries, date) ? `Loaded entry for ${date}.` : `Editing entry for ${date}.`
-    );
-  }
+    window.addEventListener('keydown', handleDateShortcut);
+    return () => window.removeEventListener('keydown', handleDateShortcut);
+  }, [entries, selectEntryDate, selectedDate, today]);
 
   function saveEntry() {
     if (!isValidEntryDate(selectedDate)) {
@@ -209,6 +252,15 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
           <button type="button" className="primary" onClick={saveEntry}>
             {isValidEntryDate(selectedDate) ? `Save entry for ${selectedDate}` : 'Save entry'}
           </button>
+
+          <aside className="shortcut-help" aria-label="Date keyboard shortcuts">
+            <h3>Shortcuts</h3>
+            <ul>
+              <li>T: Today</li>
+              <li>[: Previous saved date</li>
+              <li>]: Next saved date</li>
+            </ul>
+          </aside>
         </form>
 
         <section className="mosaic-panel" aria-labelledby="mosaic-heading">
@@ -398,4 +450,39 @@ function previewNote(note: string): string {
 
 function currentDate(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+function shortcutTargetFromEvent(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) {
+    return null;
+  }
+
+  return {
+    tagName: target.tagName,
+    isContentEditable: target.isContentEditable
+  };
+}
+
+function shortcutStatus(action: DateShortcutAction, date: string): string {
+  if (action === 'today') {
+    return `Shortcut moved to today, ${date}.`;
+  }
+
+  if (action === 'previous') {
+    return `Shortcut moved to previous saved date, ${date}.`;
+  }
+
+  return `Shortcut moved to next saved date, ${date}.`;
+}
+
+function noShortcutNeighborStatus(action: DateShortcutAction): string {
+  if (action === 'previous') {
+    return 'No previous saved entry date.';
+  }
+
+  if (action === 'next') {
+    return 'No next saved entry date.';
+  }
+
+  return 'Already editing today.';
 }
