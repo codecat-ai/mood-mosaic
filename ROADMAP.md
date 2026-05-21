@@ -25,10 +25,11 @@ and export format may still evolve with documented migration paths.
   evolve.
 - Keep lightweight entry-form validation hints aligned with save validation and
   accessible field descriptions.
+- Keep optional note prompts small, clear, and non-blocking for users who want
+  more reflection structure.
 
 ## Next
 
-- Add optional note prompts for users who want a little more reflection structure.
 - Add a small import dry-run example to the backup panel so first-time users can
   understand replacement counts before pasting their own data.
 - Add a clear unsaved-form reset action for returning the selected date to its
@@ -82,3 +83,5 @@ least two cadence reviews without major feature requests.
 - Show lightweight validation hints near the entry form for invalid selected
   dates, unset mood values, unset or out-of-range energy/focus values, and notes
   that are close to the saved-entry length limit before save attempts fail.
+- Choose an optional reflection prompt near the note field, display the prompt
+  text, and append it as a note starter without replacing existing note text.

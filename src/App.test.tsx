@@ -231,6 +231,43 @@ describe('App', () => {
     );
   });
 
+  it('shows optional note prompts and displays the selected prompt text', () => {
+    render(<App storageTarget={window.localStorage} today="2026-05-21" />);
+
+    expect(screen.getByLabelText(/reflection prompt/i)).toHaveAccessibleDescription(
+      /optional structure for your note/i
+    );
+    expect(screen.getByText(/choose a prompt if useful/i)).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(/reflection prompt/i), {
+      target: { value: 'focus-support' }
+    });
+
+    expect(screen.getByText(/what helped or interrupted your focus/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /use prompt as note starter/i })
+    ).toBeInTheDocument();
+  });
+
+  it('appends a selected prompt starter without replacing an existing note', () => {
+    render(<App storageTarget={window.localStorage} today="2026-05-21" />);
+
+    fireEvent.change(screen.getByLabelText(/^note$/i), {
+      target: { value: 'Deep work before lunch' }
+    });
+    fireEvent.change(screen.getByLabelText(/reflection prompt/i), {
+      target: { value: 'energy-shift' }
+    });
+    fireEvent.click(screen.getByRole('button', { name: /use prompt as note starter/i }));
+
+    expect(screen.getByLabelText(/^note$/i)).toHaveValue(
+      'Deep work before lunch\n\nWhat changed your energy today?\n'
+    );
+    expect(screen.getByRole('status', { name: /^app status$/i })).toHaveTextContent(
+      /added prompt to note without replacing existing text/i
+    );
+  });
+
   it('guides first-time backup and restore flows before any entries exist', () => {
     render(<App storageTarget={window.localStorage} today="2026-05-21" />);
 

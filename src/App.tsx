@@ -17,6 +17,12 @@ import {
   type EntryValidationHint
 } from './entryValidationHints';
 import { previewJournalImport, type ImportPreview } from './importPreview';
+import {
+  DEFAULT_REFLECTION_PROMPT_ID,
+  REFLECTION_PROMPTS,
+  createPromptNoteStarter,
+  getReflectionPrompt
+} from './notePrompts';
 import { getRecentEntries } from './recentEntries';
 import {
   buildMosaicCells,
@@ -51,6 +57,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
   const [entries, setEntries] = useState<JournalEntry[]>(initial.entries);
   const [selectedDate, setSelectedDate] = useState(today);
   const [trendMode, setTrendMode] = useState<TrendFilterMode>('all');
+  const [selectedPromptId, setSelectedPromptId] = useState(DEFAULT_REFLECTION_PROMPT_ID);
   const [form, setForm] = useState<FormState>(() => formFromEntry(initial.entries, today));
   const [importSource, setImportSource] = useState('');
   const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
@@ -65,6 +72,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
   const cells = buildMosaicCells(trendEntries);
   const copySummary = createCopySummary(trendEntries);
   const recentEntries = getRecentEntries(trendEntries);
+  const selectedPrompt = getReflectionPrompt(selectedPromptId);
   const backupGuidance =
     entries.length === 0
       ? 'Save an entry before exporting a meaningful JSON backup. Empty exports are only useful for checking the file shape.'
@@ -193,6 +201,17 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
     }
   }
 
+  function useSelectedPrompt() {
+    const nextNote = createPromptNoteStarter(form.note, selectedPromptId);
+
+    setForm({ ...form, note: nextNote });
+    setStatus(
+      form.note.trim().length > 0
+        ? 'Added prompt to note without replacing existing text.'
+        : 'Added prompt to note.'
+    );
+  }
+
   return (
     <main className="app-shell">
       <section className="hero">
@@ -279,6 +298,34 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
               placeholder="One useful detail about today"
             />
           </label>
+
+          <div className="prompt-box">
+            <label>
+              Reflection prompt
+              <select
+                aria-describedby="reflection-prompt-help"
+                value={selectedPromptId}
+                onChange={(event) => setSelectedPromptId(event.target.value)}
+              >
+                {REFLECTION_PROMPTS.map((prompt) => (
+                  <option key={prompt.id} value={prompt.id}>
+                    {prompt.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <p id="reflection-prompt-help">
+              Optional structure for your note. Choose a prompt if useful.
+            </p>
+            {selectedPrompt.text ? (
+              <div className="selected-prompt" aria-live="polite">
+                <p>{selectedPrompt.text}</p>
+                <button type="button" onClick={useSelectedPrompt}>
+                  Use prompt as note starter
+                </button>
+              </div>
+            ) : null}
+          </div>
 
           {entryValidationHints.length > 0 ? (
             <div
