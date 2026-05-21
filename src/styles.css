@@ -165,6 +165,34 @@ textarea {
   padding: 10px 12px;
 }
 
+.prompt-box {
+  border: 1px solid #d7d3c8;
+  border-radius: 8px;
+  background: #f6f4ee;
+  margin: 0 0 14px;
+  padding: 12px;
+}
+
+.prompt-box label {
+  margin-bottom: 8px;
+}
+
+.prompt-box p {
+  color: #5b675d;
+  margin-bottom: 0;
+}
+
+.selected-prompt {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.selected-prompt p {
+  color: #344036;
+  font-weight: 700;
+}
+
 .form-hints ul {
   display: grid;
   gap: 4px;
