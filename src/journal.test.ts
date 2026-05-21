@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { CURRENT_SCHEMA_VERSION, upsertEntry, validateEntry } from './journal';
+import { CURRENT_SCHEMA_VERSION, isValidEntryDate, upsertEntry, validateEntry } from './journal';
 
 describe('journal validation and upsert', () => {
+  it('recognizes real YYYY-MM-DD entry dates', () => {
+    expect(isValidEntryDate('2026-05-21')).toBe(true);
+    expect(isValidEntryDate('2026-02-31')).toBe(false);
+    expect(isValidEntryDate('')).toBe(false);
+  });
+
   it('accepts a valid entry and normalizes the note', () => {
     const result = validateEntry({
       date: '2026-05-21',
@@ -75,5 +81,31 @@ describe('journal validation and upsert', () => {
     expect(previous[1]?.mood).toBe('tired');
     expect(next).toHaveLength(2);
     expect(next[1]).toMatchObject({ date: '2026-05-21', mood: 'bright', note: 'new note' });
+  });
+
+  it('inserts an older selected date in sorted order', () => {
+    const next = upsertEntry(
+      [
+        {
+          date: '2026-05-21',
+          mood: 'focused',
+          energy: 5,
+          focus: 4,
+          note: 'today',
+          schemaVersion: CURRENT_SCHEMA_VERSION
+        }
+      ],
+      {
+        date: '2026-05-19',
+        mood: 'reflective',
+        energy: 2,
+        focus: 3,
+        note: 'older entry',
+        schemaVersion: CURRENT_SCHEMA_VERSION
+      }
+    );
+
+    expect(next.map((entry) => entry.date)).toEqual(['2026-05-19', '2026-05-21']);
+    expect(next[0]).toMatchObject({ date: '2026-05-19', mood: 'reflective' });
   });
 });

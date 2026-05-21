@@ -54,7 +54,7 @@ export function validateEntry(raw: unknown): ValidationResult {
   const schemaVersion =
     typeof raw.schemaVersion === 'number' ? raw.schemaVersion : CURRENT_SCHEMA_VERSION;
 
-  if (!isValidIsoDate(date)) {
+  if (!isValidEntryDate(date)) {
     issues.push('Entry date must be a valid YYYY-MM-DD date.');
   }
 
@@ -155,7 +155,7 @@ function isRating(value: number): value is 1 | 2 | 3 | 4 | 5 {
   return Number.isInteger(value) && value >= 1 && value <= 5;
 }
 
-function isValidIsoDate(value: string): boolean {
+export function isValidEntryDate(value: string): boolean {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!match) {
     return false;

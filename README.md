@@ -15,7 +15,7 @@ turns small daily entries into a readable calendar mosaic and short summary.
 
 ## Features
 
-- Add or update one entry per date with mood, energy, focus, and a short note.
+- Add or update one entry per selected date with mood, energy, focus, and a short note.
 - See a sorted color mosaic, weekly-style averages, mood counts, and streaks.
 - Copy a concise reflection summary for a journal, coach, or check-in.
 - Export and import JSON backups from the browser.
@@ -38,8 +38,9 @@ npm ci
 npm run dev
 ```
 
-Open the local URL printed by Vite. Add today's mood, energy, focus, and note,
-then use the mosaic and summary panels to review recent patterns.
+Open the local URL printed by Vite. Pick today's date or an older entry date,
+add mood, energy, focus, and note details, then use the mosaic and summary
+panels to review recent patterns.
 
 ## Examples
 
@@ -86,8 +87,8 @@ in `src/storage.ts`, and the React UI in `src/App.tsx`.
 ## Testing
 
 Tests cover validation and upsert behavior, analytics and mosaic sorting,
-storage import/export handling, legacy schema normalization, and UI smoke flows.
-Write tests before changing behavior.
+storage import/export handling, legacy schema normalization, date-based editing,
+and UI smoke flows. Write tests before changing behavior.
 
 ## Roadmap
 

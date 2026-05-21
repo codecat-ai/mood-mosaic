@@ -1,5 +1,11 @@
 import { useMemo, useState, type CSSProperties } from 'react';
-import { CURRENT_SCHEMA_VERSION, upsertEntry, validateEntry, type JournalEntry } from './journal';
+import {
+  CURRENT_SCHEMA_VERSION,
+  isValidEntryDate,
+  upsertEntry,
+  validateEntry,
+  type JournalEntry
+} from './journal';
 import { buildMosaicCells, buildSummary, createCopySummary } from './summary';
 import { createJournalStorage } from './storage';
 import './styles.css';
@@ -25,6 +31,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
   );
   const initial = useMemo(() => storage.load(), [storage]);
   const [entries, setEntries] = useState<JournalEntry[]>(initial.entries);
+  const [selectedDate, setSelectedDate] = useState(today);
   const [form, setForm] = useState<FormState>(() => formFromEntry(initial.entries, today));
   const [importSource, setImportSource] = useState('');
   const [exportSource, setExportSource] = useState('');
@@ -36,9 +43,28 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
   const cells = buildMosaicCells(entries);
   const copySummary = createCopySummary(entries);
 
+  function selectEntryDate(date: string) {
+    setSelectedDate(date);
+
+    if (!isValidEntryDate(date)) {
+      setStatus('Choose a valid date before saving this entry.');
+      return;
+    }
+
+    setForm(formFromEntry(entries, date));
+    setStatus(
+      entryForDate(entries, date) ? `Loaded entry for ${date}.` : `Editing entry for ${date}.`
+    );
+  }
+
   function saveEntry() {
+    if (!isValidEntryDate(selectedDate)) {
+      setStatus('Choose a valid date before saving this entry.');
+      return;
+    }
+
     const result = validateEntry({
-      date: today,
+      date: selectedDate,
       mood: form.mood,
       energy: Number(form.energy),
       focus: Number(form.focus),
@@ -54,7 +80,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
     const nextEntries = upsertEntry(entries, result.entry);
     storage.save(nextEntries);
     setEntries(nextEntries);
-    setStatus(`Saved ${today}.`);
+    setStatus(`Saved ${selectedDate}.`);
   }
 
   function exportJson() {
@@ -72,7 +98,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
     }
 
     setEntries(result.entries);
-    setForm(formFromEntry(result.entries, today));
+    setForm(formFromEntry(result.entries, selectedDate));
     setStatus(`Imported ${result.entries.length} entries.`);
   }
 
@@ -104,8 +130,22 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
 
       <section className="workspace" aria-label="Mood journal workspace">
         <form className="entry-panel" onSubmit={(event) => event.preventDefault()}>
-          <h2>Today</h2>
-          <p className="date-chip">{today}</p>
+          <h2>Entry</h2>
+          <p className="date-chip" id="editing-date-status">
+            {isValidEntryDate(selectedDate)
+              ? `Editing entry for ${selectedDate}`
+              : 'Choose a valid date to edit'}
+          </p>
+
+          <label>
+            Entry date
+            <input
+              aria-describedby="editing-date-status"
+              type="date"
+              value={selectedDate}
+              onChange={(event) => selectEntryDate(event.target.value)}
+            />
+          </label>
 
           <label>
             Mood
@@ -156,7 +196,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
           </label>
 
           <button type="button" className="primary" onClick={saveEntry}>
-            Save today
+            {isValidEntryDate(selectedDate) ? `Save entry for ${selectedDate}` : 'Save entry'}
           </button>
         </form>
 
@@ -255,8 +295,8 @@ function SummaryMetric({ label, value }: { label: string; value: string }) {
   );
 }
 
-function formFromEntry(entries: JournalEntry[], today: string): FormState {
-  const existing = entries.find((entry) => entry.date === today);
+function formFromEntry(entries: JournalEntry[], date: string): FormState {
+  const existing = entryForDate(entries, date);
 
   return {
     mood: existing?.mood ?? MOODS[0],
@@ -264,6 +304,10 @@ function formFromEntry(entries: JournalEntry[], today: string): FormState {
     focus: String(existing?.focus ?? 3),
     note: existing?.note ?? ''
   };
+}
+
+function entryForDate(entries: JournalEntry[], date: string): JournalEntry | undefined {
+  return entries.find((entry) => entry.date === date);
 }
 
 function currentDate(): string {
