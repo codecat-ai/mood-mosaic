@@ -11,6 +11,11 @@ import {
   validateEntry,
   type JournalEntry
 } from './journal';
+import {
+  getEntryValidationHints,
+  type EntryValidationField,
+  type EntryValidationHint
+} from './entryValidationHints';
 import { previewJournalImport, type ImportPreview } from './importPreview';
 import { getRecentEntries } from './recentEntries';
 import {
@@ -66,6 +71,13 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
       : `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} ready to export.`;
   const importGuidance =
     'Preview import safely before replacement. Browser data is not changed until you confirm.';
+  const entryValidationHints = getEntryValidationHints({
+    date: selectedDate,
+    mood: form.mood,
+    energy: form.energy,
+    focus: form.focus,
+    note: form.note
+  });
 
   const selectEntryDate = useCallback(
     (date: string, nextStatus?: string) => {
@@ -209,7 +221,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
           <label>
             Entry date
             <input
-              aria-describedby="editing-date-status"
+              aria-describedby={describedBy('date', entryValidationHints, 'editing-date-status')}
               type="date"
               value={selectedDate}
               onChange={(event) => selectEntryDate(event.target.value)}
@@ -219,6 +231,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
           <label>
             Mood
             <select
+              aria-describedby={describedBy('mood', entryValidationHints)}
               value={form.mood}
               onChange={(event) => setForm({ ...form, mood: event.target.value })}
             >
@@ -234,6 +247,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
             <label>
               Energy
               <input
+                aria-describedby={describedBy('energy', entryValidationHints)}
                 min="1"
                 max="5"
                 type="number"
@@ -244,6 +258,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
             <label>
               Focus
               <input
+                aria-describedby={describedBy('focus', entryValidationHints)}
                 min="1"
                 max="5"
                 type="number"
@@ -256,6 +271,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
           <label>
             Note
             <textarea
+              aria-describedby={describedBy('note', entryValidationHints)}
               maxLength={480}
               rows={5}
               value={form.note}
@@ -263,6 +279,23 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
               placeholder="One useful detail about today"
             />
           </label>
+
+          {entryValidationHints.length > 0 ? (
+            <div
+              aria-label="Entry validation hints"
+              aria-live="polite"
+              className="form-hints"
+              role="status"
+            >
+              <ul>
+                {entryValidationHints.map((hint) => (
+                  <li id={hint.id} key={hint.id}>
+                    {hint.message}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
 
           <button type="button" className="primary" onClick={saveEntry}>
             {isValidEntryDate(selectedDate) ? `Save entry for ${selectedDate}` : 'Save entry'}
@@ -453,7 +486,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
         </section>
       </section>
 
-      <p className="status" role="status" aria-live="polite">
+      <p aria-label="App status" className="status" role="status" aria-live="polite">
         {status}
       </p>
     </main>
@@ -467,6 +500,17 @@ function SummaryMetric({ label, value }: { label: string; value: string }) {
       <strong>{value}</strong>
     </div>
   );
+}
+
+function describedBy(
+  field: EntryValidationField,
+  hints: EntryValidationHint[],
+  baseId?: string
+): string | undefined {
+  const hint = hints.find((item) => item.field === field);
+  const ids = [baseId, hint?.id].filter(Boolean);
+
+  return ids.length > 0 ? ids.join(' ') : undefined;
 }
 
 function formFromEntry(entries: JournalEntry[], date: string): FormState {

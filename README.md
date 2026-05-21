@@ -21,6 +21,8 @@ turns small daily entries into a readable calendar mosaic and short summary.
 - Review recent entries in a compact keyboard-friendly list and jump straight into editing.
 - Use date shortcuts in the entry form: `T` for today, `[` for the previous saved date,
   and `]` for the next saved date.
+- See lightweight entry-form hints for invalid dates, missing ratings, and notes
+  close to the saved-entry length limit before pressing Save.
 - Copy a concise reflection summary for a journal, coach, or check-in.
 - Export JSON backups with first-time guidance and preview imports before replacing browser data.
 - Validate entries and imports without crashing on invalid or legacy data.
@@ -44,13 +46,15 @@ npm run dev
 
 Open the local URL printed by Vite. Pick today's date or an older entry date,
 add mood, energy, focus, and note details, then use the mosaic and summary
-panels to review patterns. The Trend range control filters the snapshot,
-mosaic, recent entries, and copied summary to all time, the Monday-Sunday week
-containing the selected entry date, or the selected calendar month. Use the
-Recent entries list to load a recent day back into the form without using the
-date picker. Keyboard users can press `T` to jump to today, `[` to move to the
-previous saved date, and `]` to move to the next saved date when they are not
-typing in a field.
+panels to review patterns. Lightweight hints appear beside the form if the
+selected date is invalid, a rating is outside 1-5, or the note is almost at the
+saved-entry limit. The Trend range control filters the snapshot, mosaic, recent
+entries, and copied summary to all time, the Monday-Sunday week containing the
+selected entry date, or the selected calendar month. Use the Recent entries
+list to load a recent day back into the form without using the date picker.
+Keyboard users can press `T` to jump to today, `[` to move to the previous
+saved date, and `]` to move to the next saved date when they are not typing in
+a field.
 
 ## Examples
 
@@ -99,18 +103,20 @@ npm test -- --run
 npm run build
 ```
 
-The core model lives in `src/journal.ts`, recent-entry selection in
-`src/recentEntries.ts`, import preview logic in `src/importPreview.ts`,
-analytics and trend filtering in `src/summary.ts`, storage in `src/storage.ts`,
-and the React UI in `src/App.tsx`.
+The core model lives in `src/journal.ts`, entry hint logic in
+`src/entryValidationHints.ts`, recent-entry selection in `src/recentEntries.ts`,
+import preview logic in `src/importPreview.ts`, analytics and trend filtering
+in `src/summary.ts`, storage in `src/storage.ts`, and the React UI in
+`src/App.tsx`.
 
 ## Testing
 
-Tests cover validation and upsert behavior, recent-entry sorting and limits,
-analytics and mosaic sorting, storage import/export handling, import previews,
-legacy schema normalization, date-based editing, trend filtering, and UI smoke
-flows. Write tests before changing behavior. Date shortcut behavior is covered
-by pure helper tests plus a UI status update test.
+Tests cover validation and upsert behavior, entry hint behavior and
+accessibility wiring, recent-entry sorting and limits, analytics and mosaic
+sorting, storage import/export handling, import previews, legacy schema
+normalization, date-based editing, trend filtering, and UI smoke flows. Write
+tests before changing behavior. Date shortcut behavior is covered by pure
+helper tests plus a UI status update test.
 
 ## Roadmap
 
