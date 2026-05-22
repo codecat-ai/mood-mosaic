@@ -8,7 +8,8 @@ describe('App', () => {
   });
 
   it('saves, exports, previews imports, confirms replacement, and updates status text', () => {
-    render(<App storageTarget={window.localStorage} today="2026-05-21" />);
+    const now = vi.fn(() => new Date('2026-05-22T09:07:30.000Z'));
+    render(<App storageTarget={window.localStorage} today="2026-05-21" now={now} />);
 
     fireEvent.change(screen.getByLabelText(/^mood$/i), { target: { value: 'calm' } });
     fireEvent.change(screen.getByLabelText(/^energy$/i), { target: { value: '4' } });
@@ -21,6 +22,7 @@ describe('App', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /export json/i }));
     expect(screen.getByRole('status')).toHaveTextContent(/exported/i);
+    expect(screen.getByText(/generated may 22, 2026, 9:07 am utc/i)).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText(/import json/i), {
       target: {
@@ -34,6 +36,7 @@ describe('App', () => {
     fireEvent.click(screen.getByRole('button', { name: /preview import/i }));
 
     expect(screen.getByRole('status')).toHaveTextContent(/ready to import 1 entry/i);
+    expect(screen.getByText(/refreshed may 22, 2026, 9:07 am utc/i)).toBeInTheDocument();
     expect(
       within(screen.getByLabelText(/import preview/i)).getByText(/1 existing date will be replaced/i)
     ).toBeInTheDocument();
@@ -59,6 +62,60 @@ describe('App', () => {
     expect(screen.getByRole('status')).toHaveTextContent(/import cannot proceed/i);
     expect(screen.queryByRole('button', { name: /confirm import/i })).not.toBeInTheDocument();
     expect(screen.getByTitle(/2026-05-21: calm/i)).toBeInTheDocument();
+  });
+
+  it('refreshes import preview timestamps after source text changes without changing storage', () => {
+    const now = vi
+      .fn()
+      .mockReturnValueOnce(new Date('2026-05-22T09:07:30.000Z'))
+      .mockReturnValueOnce(new Date('2026-05-22T09:08:45.000Z'));
+    seedEntries([
+      {
+        date: '2026-05-21',
+        mood: 'calm',
+        energy: 3,
+        focus: 3,
+        note: 'Keep me',
+        schemaVersion: 1
+      }
+    ]);
+
+    render(<App storageTarget={window.localStorage} today="2026-05-21" now={now} />);
+
+    fireEvent.change(screen.getByLabelText(/import json/i), {
+      target: {
+        value: JSON.stringify({
+          entries: [{ date: '2026-05-22', mood: 'steady', energy: 4, focus: 4, note: 'One' }]
+        })
+      }
+    });
+    fireEvent.click(screen.getByRole('button', { name: /preview import/i }));
+
+    expect(screen.getByLabelText(/import preview/i)).toHaveTextContent(
+      /refreshed may 22, 2026, 9:07 am utc/i
+    );
+
+    fireEvent.change(screen.getByLabelText(/import json/i), {
+      target: {
+        value: JSON.stringify({
+          entries: [{ date: '2026-05-23', mood: 'bright', energy: 5, focus: 5, note: 'Two' }]
+        })
+      }
+    });
+    expect(screen.queryByLabelText(/import preview/i)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /preview import/i }));
+
+    expect(screen.getByLabelText(/import preview/i)).toHaveTextContent(
+      /refreshed may 22, 2026, 9:08 am utc/i
+    );
+    const saved = JSON.parse(window.localStorage.getItem('mood-mosaic:journal') ?? '{}');
+    expect(saved.entries).toEqual([
+      expect.objectContaining({
+        date: '2026-05-21',
+        note: 'Keep me'
+      })
+    ]);
   });
 
   it('defaults the editable entry date to today and announces the selected date', () => {

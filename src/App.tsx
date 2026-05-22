@@ -34,6 +34,7 @@ import {
   getReflectionPrompt
 } from './notePrompts';
 import { getRecentEntries } from './recentEntries';
+import { formatBackupTimestamp } from './backupTimestamps';
 import {
   buildMosaicCells,
   buildSummary,
@@ -49,9 +50,14 @@ const MOODS = ['calm', 'focused', 'bright', 'tired', 'stressed', 'reflective', '
 interface AppProps {
   storageTarget?: Storage;
   today?: string;
+  now?: () => Date;
 }
 
-export default function App({ storageTarget, today = currentDate() }: AppProps) {
+export default function App({
+  storageTarget,
+  today = currentDate(),
+  now = () => new Date()
+}: AppProps) {
   const storage = useMemo(
     () => createJournalStorage(storageTarget ?? window.localStorage),
     [storageTarget]
@@ -66,7 +72,9 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
   );
   const [importSource, setImportSource] = useState('');
   const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
+  const [importPreviewRefreshedAt, setImportPreviewRefreshedAt] = useState<string | null>(null);
   const [exportSource, setExportSource] = useState('');
+  const [exportGeneratedAt, setExportGeneratedAt] = useState<string | null>(null);
   const [status, setStatus] = useState(
     initial.issues.length > 0 ? `Loaded with issues: ${initial.issues.join(' ')}` : 'Ready'
   );
@@ -85,6 +93,12 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
       : `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} ready to export.`;
   const importGuidance =
     'Preview import safely before replacement. Browser data is not changed until you confirm.';
+  const exportTimestampText = exportGeneratedAt
+    ? `Generated ${formatBackupTimestamp(exportGeneratedAt)}.`
+    : null;
+  const importTimestampText = importPreviewRefreshedAt
+    ? `Refreshed ${formatBackupTimestamp(importPreviewRefreshedAt)}.`
+    : null;
   const importDryRunExample = useMemo(() => createImportDryRunExamplePreview(), []);
   const entryValidationHints = getEntryValidationHints({
     date: selectedDate,
@@ -188,6 +202,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
   function exportJson() {
     const exported = storage.exportJson();
     setExportSource(exported);
+    setExportGeneratedAt(now().toISOString());
     setStatus('Exported JSON backup.');
   }
 
@@ -195,6 +210,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
     const preview = previewJournalImport(importSource, entries);
 
     setImportPreview(preview);
+    setImportPreviewRefreshedAt(now().toISOString());
     setStatus(preview.summary);
   }
 
@@ -208,6 +224,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
     setEntries(importPreview.acceptedEntries);
     setForm(createResetFormState(importPreview.acceptedEntries, selectedDate));
     setImportPreview(null);
+    setImportPreviewRefreshedAt(null);
     setStatus(`Imported ${importPreview.acceptedEntryCount} entries.`);
   }
 
@@ -496,12 +513,19 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
           </div>
           <textarea
             aria-label="Exported JSON"
-            aria-describedby="backup-guidance"
+            aria-describedby={
+              exportTimestampText ? 'backup-guidance export-generated-at' : 'backup-guidance'
+            }
             readOnly
             value={exportSource}
             placeholder="Exported JSON appears here"
             rows={8}
           />
+          {exportTimestampText ? (
+            <p className="backup-timestamp" id="export-generated-at" aria-live="polite">
+              {exportTimestampText}
+            </p>
+          ) : null}
         </section>
 
         <section aria-labelledby="import-heading">
@@ -531,6 +555,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
               onChange={(event) => {
                 setImportSource(event.target.value);
                 setImportPreview(null);
+                setImportPreviewRefreshedAt(null);
               }}
               placeholder='{"entries":[...]}'
               rows={8}
@@ -542,6 +567,11 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
           {importPreview ? (
             <div className="import-preview" aria-label="Import preview">
               <p>{importPreview.summary}</p>
+              {importTimestampText ? (
+                <p className="backup-timestamp" aria-live="polite">
+                  {importTimestampText}
+                </p>
+              ) : null}
               <dl>
                 <div>
                   <dt>Accepted entries</dt>

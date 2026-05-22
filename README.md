@@ -32,6 +32,8 @@ turns small daily entries into a readable calendar mosaic and short summary.
 - Copy a concise reflection summary for a journal, coach, or check-in.
 - Export JSON backups with first-time guidance, a dry-run import example, and
   previews before replacing browser data.
+- See compact generated and refreshed timestamps after exporting a backup or
+  previewing a restore.
 - Validate entries and imports without crashing on invalid or legacy data.
 - Run fully client-side after a production build.
 
@@ -125,17 +127,23 @@ Example review flow: save several days, pick This week or This month in Trend
 range, tab to Recent entries, then use an Edit button or the `[` and `]`
 shortcuts to load a date's mood, energy, focus, and note into the form.
 
+Example backup/restore check: click Export JSON and confirm the backup panel
+shows when that payload was generated, then preview an import and confirm the
+restore preview shows when it was refreshed before any saved entries change.
+
 ## Configuration
 
 There is no account, server, or cloud configuration. Data is stored in browser
 LocalStorage under `mood-mosaic:journal`. Export JSON regularly if you want a
 portable backup or need to move browsers. When there are no saved entries, the
 backup panel explains that an export is not meaningful until an entry is saved.
-Imports show concise restore guidance and a preview first with the accepted
-entry count, date range, issues, and replacement/addition counts before you
-confirm the browser data replacement. The import panel also includes a small
-read-only dry-run JSON example so first-time users can see how replacement and
-new-date counts work before pasting their own backup.
+After an export, the backup panel shows a compact generated timestamp for the
+visible JSON payload. Imports show concise restore guidance and a preview first
+with the accepted entry count, date range, issues, replacement/addition counts,
+and a compact refreshed timestamp before you confirm the browser data
+replacement. The import panel also includes a small read-only dry-run JSON
+example so first-time users can see how replacement and new-date counts work
+before pasting their own backup.
 
 ## Development
 
@@ -160,8 +168,9 @@ accessibility wiring, recent-entry sorting and limits, analytics and mosaic
 sorting, storage import/export handling, import previews, legacy schema
 normalization, note prompt lookup and appending, date-based editing, trend
 filtering, unsaved-form reset behavior, unsaved-change detection, and UI smoke
-flows. Write tests before changing behavior. Date shortcut behavior is covered
-by pure helper tests plus a UI status update test.
+flows. Backup timestamp formatting is covered by deterministic pure helper
+tests and injected-clock UI tests. Write tests before changing behavior. Date
+shortcut behavior is covered by pure helper tests plus a UI status update test.
 
 ## Roadmap
 

@@ -34,8 +34,8 @@ and export format may still evolve with documented migration paths.
 
 ## Next
 
-- Add compact export/import timestamps so users can tell when a backup was last
-  generated or a restore preview was last refreshed.
+- Add a lightweight recent-entry search or filter so longer local journals stay
+  reviewable without changing the storage format.
 
 ## Later
 
@@ -96,3 +96,5 @@ least two cadence reviews without major feature requests.
 - Show a lightweight unsaved-change indicator when the current form differs
   from the selected date's saved entry or default values, and clear it after
   save or reset.
+- Show compact generated and refreshed timestamps after exporting a backup or
+  previewing a restore, without writing those timestamps into journal entries.
