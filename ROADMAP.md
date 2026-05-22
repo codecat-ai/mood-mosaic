@@ -32,8 +32,8 @@ and export format may still evolve with documented migration paths.
 
 ## Next
 
-- Add a clear unsaved-form reset action for returning the selected date to its
-  last saved entry values.
+- Add a lightweight unsaved-change indicator when the current form differs from
+  the selected date's saved entry or default values.
 
 ## Later
 
@@ -88,3 +88,6 @@ least two cadence reviews without major feature requests.
   that are close to the saved-entry length limit before save attempts fail.
 - Choose an optional reflection prompt near the note field, display the prompt
   text, and append it as a note starter without replacing existing note text.
+- Reset unsaved form edits for the selected date back to its saved mood, energy,
+  focus, and note, or back to default values when no entry exists, without
+  mutating stored entries.
