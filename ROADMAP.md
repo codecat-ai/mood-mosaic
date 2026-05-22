@@ -36,9 +36,9 @@ and export format may still evolve with documented migration paths.
 
 ## Next
 
-- Add a small backup sanity-check view that summarizes pasted JSON before users
-  run a full import preview, keeping restore decisions easier for longer local
-  journals.
+- Add a compact restore decision note after import preview that explains whether
+  the preview will replace existing dates, add new dates, or both before users
+  confirm.
 
 ## Later
 
@@ -91,6 +91,9 @@ least two cadence reviews without major feature requests.
 - Show a small import dry-run example in the backup and restore panel with a
   readable JSON payload, one existing-date replacement, one new date, and the
   same deterministic preview summary users will see before confirming imports.
+- Show a small backup sanity-check view after users paste import JSON, including
+  JSON validity, schema version, raw entry count, valid entry count, issue count,
+  issue messages, and date range before the full preview runs.
 - Show lightweight validation hints near the entry form for invalid selected
   dates, unset mood values, unset or out-of-range energy/focus values, and notes
   that are close to the saved-entry length limit before save attempts fail.

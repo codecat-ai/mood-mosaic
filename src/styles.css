@@ -390,6 +390,7 @@ textarea {
   margin: 8px 0 0;
 }
 
+.backup-sanity-check,
 .import-preview,
 .dry-run-example {
   border: 1px solid #d7d3c8;
@@ -403,6 +404,7 @@ textarea {
   margin-bottom: 14px;
 }
 
+.backup-sanity-check h3,
 .dry-run-example h3 {
   font-size: 1rem;
   margin: 0 0 8px;
@@ -413,10 +415,12 @@ textarea {
   margin-bottom: 10px;
 }
 
+.backup-sanity-check p,
 .import-preview p {
   margin-top: 0;
 }
 
+.backup-sanity-check dl,
 .import-preview dl {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -424,16 +428,19 @@ textarea {
   margin: 12px 0;
 }
 
+.backup-sanity-check dt,
 .import-preview dt {
   color: #5b675d;
   font-size: 0.88rem;
 }
 
+.backup-sanity-check dd,
 .import-preview dd {
   font-weight: 700;
   margin: 0;
 }
 
+.backup-sanity-check ul,
 .import-preview ul {
   color: #6b2d1f;
   padding-left: 1.2rem;

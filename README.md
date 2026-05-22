@@ -32,7 +32,7 @@ turns small daily entries into a readable calendar mosaic and short summary.
   starter without replacing existing note text.
 - Copy a concise reflection summary for a journal, coach, or check-in.
 - Export JSON backups with first-time guidance, a dry-run import example, and
-  previews before replacing browser data.
+  a pasted-JSON sanity check before previews replace browser data.
 - See compact generated and refreshed timestamps after exporting a backup or
   previewing a restore.
 - Validate entries and imports without crashing on invalid or legacy data.
@@ -72,6 +72,9 @@ review list by date, mood, or note within the selected trend range, then load a
 recent day back into the form without using the date picker. Keyboard users can
 press `T` to jump to today, `[` to move to the previous saved date, and `]` to
 move to the next saved date when they are not typing in a field.
+When you paste backup JSON into the import box, a read-only Backup sanity check
+summarizes JSON validity, schema version, raw entries, valid entries, issues,
+and date range before you click Preview import.
 
 ## Examples
 
@@ -131,8 +134,9 @@ use an Edit button or the `[` and `]` shortcuts to load a date's mood, energy,
 focus, and note into the form.
 
 Example backup/restore check: click Export JSON and confirm the backup panel
-shows when that payload was generated, then preview an import and confirm the
-restore preview shows when it was refreshed before any saved entries change.
+shows when that payload was generated, paste import JSON and review the Backup
+sanity check, then preview an import and confirm the restore preview shows when
+it was refreshed before any saved entries change.
 
 ## Configuration
 
@@ -146,7 +150,9 @@ with the accepted entry count, date range, issues, replacement/addition counts,
 and a compact refreshed timestamp before you confirm the browser data
 replacement. The import panel also includes a small read-only dry-run JSON
 example so first-time users can see how replacement and new-date counts work
-before pasting their own backup.
+before pasting their own backup. After users paste their own JSON, a read-only
+sanity check summarizes validity, schema version, raw and valid entry counts,
+issues, and date range without saving data or replacing the full preview flow.
 
 ## Development
 
@@ -161,19 +167,21 @@ The core model lives in `src/journal.ts`, entry hint logic in
 `src/entryValidationHints.ts`, optional note prompt logic in
 `src/notePrompts.ts`, deterministic form reset logic in `src/formReset.ts`,
 recent-entry selection in `src/recentEntries.ts`, import preview logic in
-`src/importPreview.ts`, analytics and trend filtering in `src/summary.ts`,
-storage in `src/storage.ts`, and the React UI in `src/App.tsx`.
+`src/importPreview.ts`, backup sanity-check logic in `src/backupSanityCheck.ts`,
+analytics and trend filtering in `src/summary.ts`, storage in `src/storage.ts`,
+and the React UI in `src/App.tsx`.
 
 ## Testing
 
 Tests cover validation and upsert behavior, entry hint behavior and
 accessibility wiring, recent-entry sorting, limits, and search, analytics and
 mosaic sorting, storage import/export handling, import previews, legacy schema
-normalization, note prompt lookup and appending, date-based editing, trend
-filtering, unsaved-form reset behavior, unsaved-change detection, and UI smoke
-flows. Backup timestamp formatting is covered by deterministic pure helper
-tests and injected-clock UI tests. Write tests before changing behavior. Date
-shortcut behavior is covered by pure helper tests plus a UI status update test.
+normalization, backup sanity checks, note prompt lookup and appending,
+date-based editing, trend filtering, unsaved-form reset behavior,
+unsaved-change detection, and UI smoke flows. Backup timestamp formatting is
+covered by deterministic pure helper tests and injected-clock UI tests. Write
+tests before changing behavior. Date shortcut behavior is covered by pure helper
+tests plus a UI status update test.
 
 ## Roadmap
 
