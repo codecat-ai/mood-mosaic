@@ -380,6 +380,12 @@ textarea {
   margin-bottom: 14px;
 }
 
+.backup-timestamp {
+  color: #5b675d;
+  font-size: 0.9rem;
+  margin: 8px 0 0;
+}
+
 .import-preview,
 .dry-run-example {
   border: 1px solid #d7d3c8;
