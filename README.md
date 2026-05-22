@@ -26,7 +26,8 @@ turns small daily entries into a readable calendar mosaic and short summary.
 - Choose an optional reflection prompt near the note field and append it as a
   starter without replacing existing note text.
 - Copy a concise reflection summary for a journal, coach, or check-in.
-- Export JSON backups with first-time guidance and preview imports before replacing browser data.
+- Export JSON backups with first-time guidance, a dry-run import example, and
+  previews before replacing browser data.
 - Validate entries and imports without crashing on invalid or legacy data.
 - Run fully client-side after a production build.
 
@@ -84,6 +85,34 @@ Example backup:
 }
 ```
 
+Example import dry run:
+
+```json
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "date": "2026-05-20",
+      "mood": "steady",
+      "energy": 4,
+      "focus": 4,
+      "note": "Dry-run replacement"
+    },
+    {
+      "date": "2026-05-21",
+      "mood": "bright",
+      "energy": 5,
+      "focus": 5,
+      "note": "Dry-run new date"
+    }
+  ]
+}
+```
+
+If an entry for `2026-05-20` already exists, the dry-run preview reports 2
+accepted entries from `2026-05-20` to `2026-05-21`, with 1 existing date
+replaced and 1 new date added.
+
 Example review flow: save several days, pick This week or This month in Trend
 range, tab to Recent entries, then use an Edit button or the `[` and `]`
 shortcuts to load a date's mood, energy, focus, and note into the form.
@@ -96,7 +125,9 @@ portable backup or need to move browsers. When there are no saved entries, the
 backup panel explains that an export is not meaningful until an entry is saved.
 Imports show concise restore guidance and a preview first with the accepted
 entry count, date range, issues, and replacement/addition counts before you
-confirm the browser data replacement.
+confirm the browser data replacement. The import panel also includes a small
+read-only dry-run JSON example so first-time users can see how replacement and
+new-date counts work before pasting their own backup.
 
 ## Development
 

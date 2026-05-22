@@ -27,11 +27,11 @@ and export format may still evolve with documented migration paths.
   accessible field descriptions.
 - Keep optional note prompts small, clear, and non-blocking for users who want
   more reflection structure.
+- Keep the import dry-run example aligned with preview replacement and new-date
+  counts as the import format evolves.
 
 ## Next
 
-- Add a small import dry-run example to the backup panel so first-time users can
-  understand replacement counts before pasting their own data.
 - Add a clear unsaved-form reset action for returning the selected date to its
   last saved entry values.
 
@@ -80,6 +80,9 @@ least two cadence reviews without major feature requests.
 - Show first-time backup guidance when there are no saved entries, switch to an
   export-ready entry count once data exists, and keep restore safety guidance
   associated with the import controls.
+- Show a small import dry-run example in the backup and restore panel with a
+  readable JSON payload, one existing-date replacement, one new date, and the
+  same deterministic preview summary users will see before confirming imports.
 - Show lightweight validation hints near the entry form for invalid selected
   dates, unset mood values, unset or out-of-range energy/focus values, and notes
   that are close to the saved-entry length limit before save attempts fail.

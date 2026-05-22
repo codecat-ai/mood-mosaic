@@ -288,6 +288,24 @@ describe('App', () => {
     );
   });
 
+  it('exposes an import dry-run example without changing saved data', () => {
+    render(<App storageTarget={window.localStorage} today="2026-05-21" />);
+
+    const importRegion = screen.getByRole('region', { name: 'Import' });
+    const example = within(importRegion).getByRole('region', { name: /import dry-run example/i });
+
+    expect(example).toHaveTextContent(/example dry run/i);
+    expect(example).toHaveTextContent(/2026-05-20/i);
+    expect(example).toHaveTextContent(/2026-05-21/i);
+    expect(example).toHaveTextContent(/2 entries from 2026-05-20 to 2026-05-21/i);
+    expect(example).toHaveTextContent(/1 existing date will be replaced/i);
+    expect(example).toHaveTextContent(/1 new date will be added/i);
+    const exampleJson = within(example).getByLabelText(/example dry-run json/i);
+    expect((exampleJson as HTMLTextAreaElement).value).toContain('"date": "2026-05-20"');
+    expect(screen.getByRole('status', { name: /^app status$/i })).toHaveTextContent(/ready/i);
+    expect(screen.queryByTitle(/2026-05-20:/i)).not.toBeInTheDocument();
+  });
+
   it('shows backup export readiness after entries exist while keeping concise import safety guidance', () => {
     seedEntries([
       {
