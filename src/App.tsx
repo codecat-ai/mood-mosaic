@@ -35,6 +35,7 @@ import {
 } from './notePrompts';
 import { getRecentEntries } from './recentEntries';
 import { formatBackupTimestamp } from './backupTimestamps';
+import { summarizeBackupJson } from './backupSanityCheck';
 import {
   buildMosaicCells,
   buildSummary,
@@ -102,6 +103,7 @@ export default function App({
     ? `Refreshed ${formatBackupTimestamp(importPreviewRefreshedAt)}.`
     : null;
   const importDryRunExample = useMemo(() => createImportDryRunExamplePreview(), []);
+  const importSanityCheck = useMemo(() => summarizeBackupJson(importSource), [importSource]);
   const entryValidationHints = getEntryValidationHints({
     date: selectedDate,
     mood: form.mood,
@@ -563,7 +565,11 @@ export default function App({
           <label>
             Import JSON
             <textarea
-              aria-describedby="import-guidance"
+              aria-describedby={
+                importSource.length > 0
+                  ? 'import-guidance backup-sanity-check-status'
+                  : 'import-guidance'
+              }
               value={importSource}
               onChange={(event) => {
                 setImportSource(event.target.value);
@@ -574,6 +580,63 @@ export default function App({
               rows={8}
             />
           </label>
+          {importSource.length > 0 ? (
+            <section
+              className="backup-sanity-check"
+              role="status"
+              aria-label="Backup sanity check"
+              aria-live="polite"
+              id="backup-sanity-check-status"
+            >
+              <h3>Backup sanity check</h3>
+              <p>{importSanityCheck.summary}</p>
+              <dl>
+                <div>
+                  <dt>JSON</dt>
+                  <dd>{importSanityCheck.isJsonValid ? 'Valid JSON' : 'Invalid JSON'}</dd>
+                </div>
+                <div>
+                  <dt>Schema version</dt>
+                  <dd>
+                    {importSanityCheck.schemaVersion === null
+                      ? 'Not found'
+                      : importSanityCheck.schemaVersion}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Raw entries</dt>
+                  <dd>
+                    {importSanityCheck.rawEntryCount === null
+                      ? 'None'
+                      : importSanityCheck.rawEntryCount}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Valid entries</dt>
+                  <dd>{importSanityCheck.validEntryCount}</dd>
+                </div>
+                <div>
+                  <dt>Issues</dt>
+                  <dd>{importSanityCheck.issueCount}</dd>
+                </div>
+                <div>
+                  <dt>Date range</dt>
+                  <dd>
+                    {importSanityCheck.dateRange
+                      ? `${importSanityCheck.dateRange.start} to ${importSanityCheck.dateRange.end}`
+                      : 'None'}
+                  </dd>
+                </div>
+              </dl>
+              {importSanityCheck.issues.length > 0 ? (
+                <ul>
+                  {importSanityCheck.issues.map((issue) => (
+                    <li key={issue}>{issue}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </section>
+          ) : null}
           <button type="button" onClick={previewImport}>
             Preview import
           </button>

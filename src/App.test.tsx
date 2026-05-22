@@ -17,11 +17,11 @@ describe('App', () => {
     fireEvent.change(screen.getByLabelText(/^note$/i), { target: { value: 'Good writing block' } });
     fireEvent.click(screen.getByRole('button', { name: /save/i }));
 
-    expect(screen.getByRole('status')).toHaveTextContent(/saved/i);
+    expect(screen.getByRole('status', { name: /^app status$/i })).toHaveTextContent(/saved/i);
     expect(screen.getByText(/1 day streak/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /export json/i }));
-    expect(screen.getByRole('status')).toHaveTextContent(/exported/i);
+    expect(screen.getByRole('status', { name: /^app status$/i })).toHaveTextContent(/exported/i);
     expect(screen.getByText(/generated may 22, 2026, 9:07 am utc/i)).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText(/import json/i), {
@@ -35,7 +35,9 @@ describe('App', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: /preview import/i }));
 
-    expect(screen.getByRole('status')).toHaveTextContent(/ready to import 1 entry/i);
+    expect(screen.getByRole('status', { name: /^app status$/i })).toHaveTextContent(
+      /ready to import 1 entry/i
+    );
     expect(screen.getByText(/refreshed may 22, 2026, 9:07 am utc/i)).toBeInTheDocument();
     expect(
       within(screen.getByLabelText(/import preview/i)).getByText(/1 existing date will be replaced/i)
@@ -44,7 +46,7 @@ describe('App', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /confirm import/i }));
 
-    expect(screen.getByRole('status')).toHaveTextContent(/imported/i);
+    expect(screen.getByRole('status', { name: /^app status$/i })).toHaveTextContent(/imported/i);
     expect(screen.getByTitle(/2026-05-21: steady/i)).toBeInTheDocument();
   });
 
@@ -59,7 +61,9 @@ describe('App', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: /preview import/i }));
 
-    expect(screen.getByRole('status')).toHaveTextContent(/import cannot proceed/i);
+    expect(screen.getByRole('status', { name: /^app status$/i })).toHaveTextContent(
+      /import cannot proceed/i
+    );
     expect(screen.queryByRole('button', { name: /confirm import/i })).not.toBeInTheDocument();
     expect(screen.getByTitle(/2026-05-21: calm/i)).toBeInTheDocument();
   });
@@ -160,7 +164,9 @@ describe('App', () => {
     expect(screen.getByLabelText(/^energy$/i)).toHaveValue(2);
     expect(screen.getByLabelText(/^focus$/i)).toHaveValue(4);
     expect(screen.getByLabelText(/^note$/i)).toHaveValue('Retrospective note');
-    expect(screen.getByRole('status')).toHaveTextContent(/loaded entry for 2026-05-19/i);
+    expect(screen.getByRole('status', { name: /^app status$/i })).toHaveTextContent(
+      /loaded entry for 2026-05-19/i
+    );
   });
 
   it('resets unsaved edits to the selected date saved values without changing storage', () => {
@@ -450,6 +456,46 @@ describe('App', () => {
     expect(screen.queryByTitle(/2026-05-20:/i)).not.toBeInTheDocument();
   });
 
+  it('shows a backup sanity check on pasted import JSON without changing saved entries', () => {
+    seedEntries([
+      {
+        date: '2026-05-19',
+        mood: 'calm',
+        energy: 3,
+        focus: 3,
+        note: 'Keep saved',
+        schemaVersion: 1
+      }
+    ]);
+
+    render(<App storageTarget={window.localStorage} today="2026-05-21" />);
+
+    fireEvent.change(screen.getByLabelText(/import json/i), {
+      target: {
+        value: JSON.stringify({
+          schemaVersion: 1,
+          entries: [
+            { date: '2026-05-20', mood: 'steady', energy: 4, focus: 4, note: 'One' },
+            { date: 'bad-date', mood: 'bright', energy: 5, focus: 5, note: 'Two' }
+          ]
+        })
+      }
+    });
+
+    const sanityCheck = screen.getByRole('status', { name: /backup sanity check/i });
+    expect(sanityCheck).toHaveTextContent(/valid json/i);
+    expect(sanityCheck).toHaveTextContent(/schema version 1/i);
+    expect(sanityCheck).toHaveTextContent(/2 raw entries/i);
+    expect(sanityCheck).toHaveTextContent(/1 valid entry/i);
+    expect(sanityCheck).toHaveTextContent(/1 issue/i);
+    expect(sanityCheck).toHaveTextContent(/2026-05-20 to 2026-05-20/i);
+    expect(sanityCheck).toHaveTextContent(/entry 2: entry date must be a valid yyyy-mm-dd date/i);
+    expect(screen.queryByLabelText(/import preview/i)).not.toBeInTheDocument();
+    expect(JSON.parse(window.localStorage.getItem('mood-mosaic:journal') ?? '{}').entries).toEqual([
+      expect.objectContaining({ date: '2026-05-19', note: 'Keep saved' })
+    ]);
+  });
+
   it('shows backup export readiness after entries exist while keeping concise import safety guidance', () => {
     seedEntries([
       {
@@ -685,7 +731,9 @@ describe('App', () => {
     expect(screen.getByLabelText(/^energy$/i)).toHaveValue(2);
     expect(screen.getByLabelText(/^focus$/i)).toHaveValue(4);
     expect(screen.getByLabelText(/^note$/i)).toHaveValue('Follow-up edits');
-    expect(screen.getByRole('status')).toHaveTextContent(/loaded entry for 2026-05-20/i);
+    expect(screen.getByRole('status', { name: /^app status$/i })).toHaveTextContent(
+      /loaded entry for 2026-05-20/i
+    );
   });
 
   it('shows date shortcut help and announces a shortcut date change', () => {
@@ -719,7 +767,7 @@ describe('App', () => {
     fireEvent.keyDown(window, { key: '[' });
 
     expect(screen.getByLabelText(/entry date/i)).toHaveValue('2026-05-19');
-    expect(screen.getByRole('status')).toHaveTextContent(
+    expect(screen.getByRole('status', { name: /^app status$/i })).toHaveTextContent(
       /shortcut moved to previous saved date, 2026-05-19/i
     );
   });
