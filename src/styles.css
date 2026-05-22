@@ -446,6 +446,15 @@ textarea {
   padding-left: 1.2rem;
 }
 
+.restore-decision-note {
+  background: #e9f1ec;
+  border-left: 4px solid #37634e;
+  color: #344036;
+  font-weight: 700;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+}
+
 .empty-state {
   color: #5b675d;
   grid-column: 1 / -1;

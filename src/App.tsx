@@ -24,6 +24,7 @@ import {
 import {
   IMPORT_DRY_RUN_EXAMPLE_JSON,
   createImportDryRunExamplePreview,
+  formatRestoreDecisionNote,
   previewJournalImport,
   type ImportPreview
 } from './importPreview';
@@ -677,6 +678,9 @@ export default function App({
                   ))}
                 </ul>
               ) : null}
+              <p className="restore-decision-note" role="note" aria-label="Restore decision">
+                {formatRestoreDecisionNote(importPreview)}
+              </p>
               {importPreview.canProceed ? (
                 <button type="button" className="primary" onClick={confirmImport}>
                   Confirm import

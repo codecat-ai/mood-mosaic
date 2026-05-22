@@ -35,6 +35,8 @@ turns small daily entries into a readable calendar mosaic and short summary.
   a pasted-JSON sanity check before previews replace browser data.
 - See compact generated and refreshed timestamps after exporting a backup or
   previewing a restore.
+- See a compact restore decision note before confirming whether a preview will
+  replace existing dates, add new dates, or both.
 - Validate entries and imports without crashing on invalid or legacy data.
 - Run fully client-side after a production build.
 
@@ -74,7 +76,9 @@ press `T` to jump to today, `[` to move to the previous saved date, and `]` to
 move to the next saved date when they are not typing in a field.
 When you paste backup JSON into the import box, a read-only Backup sanity check
 summarizes JSON validity, schema version, raw entries, valid entries, issues,
-and date range before you click Preview import.
+and date range before you click Preview import. After previewing, a read-only
+restore decision note near Confirm import states whether confirmation will
+replace existing dates, add new dates, or both.
 
 ## Examples
 
@@ -136,7 +140,8 @@ focus, and note into the form.
 Example backup/restore check: click Export JSON and confirm the backup panel
 shows when that payload was generated, paste import JSON and review the Backup
 sanity check, then preview an import and confirm the restore preview shows when
-it was refreshed before any saved entries change.
+it was refreshed and whether confirming will replace existing dates, add new
+dates, or both before any saved entries change.
 
 ## Configuration
 
@@ -147,12 +152,14 @@ backup panel explains that an export is not meaningful until an entry is saved.
 After an export, the backup panel shows a compact generated timestamp for the
 visible JSON payload. Imports show concise restore guidance and a preview first
 with the accepted entry count, date range, issues, replacement/addition counts,
-and a compact refreshed timestamp before you confirm the browser data
-replacement. The import panel also includes a small read-only dry-run JSON
-example so first-time users can see how replacement and new-date counts work
-before pasting their own backup. After users paste their own JSON, a read-only
-sanity check summarizes validity, schema version, raw and valid entry counts,
-issues, and date range without saving data or replacing the full preview flow.
+compact decision note, and refreshed timestamp before you confirm the browser
+data replacement. The decision note spells out whether confirming will replace
+existing dates, add new dates, or both. The import panel also includes a small
+read-only dry-run JSON example so first-time users can see how replacement and
+new-date counts work before pasting their own backup. After users paste their
+own JSON, a read-only sanity check summarizes validity, schema version, raw and
+valid entry counts, issues, and date range without saving data or replacing the
+full preview flow.
 
 ## Development
 
@@ -179,9 +186,11 @@ mosaic sorting, storage import/export handling, import previews, legacy schema
 normalization, backup sanity checks, note prompt lookup and appending,
 date-based editing, trend filtering, unsaved-form reset behavior,
 unsaved-change detection, and UI smoke flows. Backup timestamp formatting is
-covered by deterministic pure helper tests and injected-clock UI tests. Write
-tests before changing behavior. Date shortcut behavior is covered by pure helper
-tests plus a UI status update test.
+covered by deterministic pure helper tests and injected-clock UI tests. Restore
+decision notes are covered by pure helper tests and UI tests that confirm
+previews do not mutate storage before confirmation. Write tests before changing
+behavior. Date shortcut behavior is covered by pure helper tests plus a UI
+status update test.
 
 ## Roadmap
 
