@@ -539,6 +539,100 @@ describe('App', () => {
     await screen.findByText(/copied reflection summary/i);
   });
 
+  it('filters only recent entries by search within the selected trend window', async () => {
+    const clipboardWrite = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText: clipboardWrite } });
+    seedEntries([
+      {
+        date: '2026-05-17',
+        mood: 'stressed',
+        energy: 1,
+        focus: 1,
+        note: 'Previous week anchor',
+        schemaVersion: 1
+      },
+      {
+        date: '2026-05-18',
+        mood: 'steady',
+        energy: 2,
+        focus: 2,
+        note: 'Week start',
+        schemaVersion: 1
+      },
+      {
+        date: '2026-05-21',
+        mood: 'focused',
+        energy: 5,
+        focus: 4,
+        note: 'Anchor week',
+        schemaVersion: 1
+      },
+      {
+        date: '2026-05-25',
+        mood: 'bright',
+        energy: 5,
+        focus: 5,
+        note: 'Next week anchor',
+        schemaVersion: 1
+      }
+    ]);
+
+    render(<App storageTarget={window.localStorage} today="2026-05-21" />);
+    fireEvent.change(screen.getByLabelText(/trend range/i), { target: { value: 'week' } });
+    fireEvent.change(screen.getByLabelText(/search recent entries/i), {
+      target: { value: 'ANCHOR' }
+    });
+
+    const recentRegion = screen.getByRole('region', { name: /recent entries/i });
+    const recentItems = within(recentRegion).getAllByRole('listitem');
+
+    expect(recentItems).toHaveLength(1);
+    expect(recentItems[0]).toHaveTextContent(/2026-05-21/i);
+    expect(recentRegion).not.toHaveTextContent(/previous week anchor/i);
+    expect(recentRegion).not.toHaveTextContent(/next week anchor/i);
+    expect(screen.getByLabelText(/journal snapshot/i)).toHaveTextContent(/2 entries/i);
+    expect(screen.getByTitle(/2026-05-18: steady/i)).toBeInTheDocument();
+    expect(screen.getByTitle(/2026-05-21: focused/i)).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /copy summary/i }));
+    });
+    expect(clipboardWrite.mock.calls[0][0]).toContain('2 entries');
+    expect(clipboardWrite.mock.calls[0][0]).toContain('Week start');
+
+    fireEvent.click(screen.getByRole('button', { name: /edit 2026-05-21/i }));
+
+    expect(screen.getByLabelText(/entry date/i)).toHaveValue('2026-05-21');
+    expect(screen.getByLabelText(/^note$/i)).toHaveValue('Anchor week');
+  });
+
+  it('shows a helpful empty state when recent entry search has no matches', () => {
+    seedEntries([
+      {
+        date: '2026-05-21',
+        mood: 'focused',
+        energy: 5,
+        focus: 4,
+        note: 'Visible if not filtered',
+        schemaVersion: 1
+      }
+    ]);
+
+    render(<App storageTarget={window.localStorage} today="2026-05-21" />);
+    fireEvent.change(screen.getByLabelText(/search recent entries/i), {
+      target: { value: 'no match' }
+    });
+
+    expect(screen.getByRole('region', { name: /recent entries/i })).toHaveTextContent(
+      /no recent entries match "no match"/i
+    );
+    expect(screen.getByLabelText(/journal snapshot/i)).toHaveTextContent(/1 entries/i);
+    expect(screen.getByTitle(/2026-05-21: focused/i)).toBeInTheDocument();
+    expect(
+      JSON.parse(window.localStorage.getItem('mood-mosaic:journal') ?? '{}').entries
+    ).toHaveLength(1);
+  });
+
   it('shows useful empty trend labels when the selected window has no entries', () => {
     seedEntries([
       {

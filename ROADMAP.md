@@ -31,11 +31,14 @@ and export format may still evolve with documented migration paths.
   counts as the import format evolves.
 - Keep the unsaved-change indicator accurate as save, reset, date switching,
   and import workflows evolve.
+- Keep recent-entry search clear and scoped to review so it does not change
+  summaries, mosaic cells, copied reflections, or stored data.
 
 ## Next
 
-- Add a lightweight recent-entry search or filter so longer local journals stay
-  reviewable without changing the storage format.
+- Add a small backup sanity-check view that summarizes pasted JSON before users
+  run a full import preview, keeping restore decisions easier for longer local
+  journals.
 
 ## Later
 
@@ -72,6 +75,9 @@ least two cadence reviews without major feature requests.
   changed.
 - Review recent entries in newest-first order, including mood, energy, focus,
   and note previews, then use an Edit button to load that date into the form.
+- Search recent entries by date, mood, or note within the selected trend window
+  before the compact review limit is applied, without changing summary stats,
+  mosaic cells, copied reflections, or stored browser data.
 - Use visible keyboard shortcuts to jump to today or move to the previous or
   next saved entry date, with live status text after the selected date changes.
 - Filter the journal snapshot, mosaic cells, recent entries, and copied
