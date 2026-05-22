@@ -106,6 +106,67 @@ describe('App', () => {
     expect(screen.getByRole('status')).toHaveTextContent(/loaded entry for 2026-05-19/i);
   });
 
+  it('resets unsaved edits to the selected date saved values without changing storage', () => {
+    seedEntries([
+      {
+        date: '2026-05-21',
+        mood: 'steady',
+        energy: 4,
+        focus: 2,
+        note: 'Saved baseline',
+        schemaVersion: 1
+      }
+    ]);
+
+    render(<App storageTarget={window.localStorage} today="2026-05-21" />);
+
+    fireEvent.change(screen.getByLabelText(/^mood$/i), { target: { value: 'bright' } });
+    fireEvent.change(screen.getByLabelText(/^energy$/i), { target: { value: '5' } });
+    fireEvent.change(screen.getByLabelText(/^focus$/i), { target: { value: '5' } });
+    fireEvent.change(screen.getByLabelText(/^note$/i), { target: { value: 'Unsaved draft' } });
+    fireEvent.click(screen.getByRole('button', { name: /reset form/i }));
+
+    expect(screen.getByLabelText(/^mood$/i)).toHaveValue('steady');
+    expect(screen.getByLabelText(/^energy$/i)).toHaveValue(4);
+    expect(screen.getByLabelText(/^focus$/i)).toHaveValue(2);
+    expect(screen.getByLabelText(/^note$/i)).toHaveValue('Saved baseline');
+    expect(screen.getByRole('status', { name: /^app status$/i })).toHaveTextContent(
+      /reset form to the saved entry for 2026-05-21/i
+    );
+    expect(screen.getByText(/reset only changes the form/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /reset form/i })).toHaveAccessibleDescription(
+      /restores the current form from saved data/i
+    );
+
+    const saved = JSON.parse(window.localStorage.getItem('mood-mosaic:journal') ?? '{}');
+    expect(saved.entries[0]).toMatchObject({
+      date: '2026-05-21',
+      mood: 'steady',
+      energy: 4,
+      focus: 2,
+      note: 'Saved baseline'
+    });
+  });
+
+  it('resets unsaved edits to defaults when the selected date has no saved entry', () => {
+    render(<App storageTarget={window.localStorage} today="2026-05-22" />);
+
+    fireEvent.change(screen.getByLabelText(/^mood$/i), { target: { value: 'stressed' } });
+    fireEvent.change(screen.getByLabelText(/^energy$/i), { target: { value: '1' } });
+    fireEvent.change(screen.getByLabelText(/^focus$/i), { target: { value: '2' } });
+    fireEvent.change(screen.getByLabelText(/^note$/i), { target: { value: 'Unsaved new day' } });
+    fireEvent.click(screen.getByRole('button', { name: /reset form/i }));
+
+    expect(screen.getByLabelText(/^mood$/i)).toHaveValue('calm');
+    expect(screen.getByLabelText(/^energy$/i)).toHaveValue(3);
+    expect(screen.getByLabelText(/^focus$/i)).toHaveValue(3);
+    expect(screen.getByLabelText(/^note$/i)).toHaveValue('');
+    expect(screen.getByRole('status', { name: /^app status$/i })).toHaveTextContent(
+      /reset form to defaults for 2026-05-22/i
+    );
+    expect(window.localStorage.getItem('mood-mosaic:journal')).toBeNull();
+  });
+
   it('saves an older selected date without replacing today and keeps the mosaic sorted', () => {
     render(<App storageTarget={window.localStorage} today="2026-05-21" />);
 

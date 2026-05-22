@@ -156,6 +156,18 @@ textarea {
   gap: 12px;
 }
 
+.form-actions {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-help {
+  color: #5b675d;
+  font-size: 0.92rem;
+  margin: 8px 0 0;
+}
+
 .form-hints {
   border: 1px solid #d7d3c8;
   border-radius: 8px;
@@ -439,6 +451,7 @@ textarea {
     min-height: 220px;
   }
 
+  .form-actions,
   .rating-grid,
   .summary-grid,
   .recent-entries li,

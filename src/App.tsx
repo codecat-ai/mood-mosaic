@@ -16,6 +16,7 @@ import {
   type EntryValidationField,
   type EntryValidationHint
 } from './entryValidationHints';
+import { createResetFormState, type EntryFormState } from './formReset';
 import {
   IMPORT_DRY_RUN_EXAMPLE_JSON,
   createImportDryRunExamplePreview,
@@ -46,13 +47,6 @@ interface AppProps {
   today?: string;
 }
 
-interface FormState {
-  mood: string;
-  energy: string;
-  focus: string;
-  note: string;
-}
-
 export default function App({ storageTarget, today = currentDate() }: AppProps) {
   const storage = useMemo(
     () => createJournalStorage(storageTarget ?? window.localStorage),
@@ -63,7 +57,9 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
   const [selectedDate, setSelectedDate] = useState(today);
   const [trendMode, setTrendMode] = useState<TrendFilterMode>('all');
   const [selectedPromptId, setSelectedPromptId] = useState(DEFAULT_REFLECTION_PROMPT_ID);
-  const [form, setForm] = useState<FormState>(() => formFromEntry(initial.entries, today));
+  const [form, setForm] = useState<EntryFormState>(() =>
+    createResetFormState(initial.entries, today)
+  );
   const [importSource, setImportSource] = useState('');
   const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
   const [exportSource, setExportSource] = useState('');
@@ -102,7 +98,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
         return;
       }
 
-      setForm(formFromEntry(entries, date));
+      setForm(createResetFormState(entries, date));
       setStatus(
         nextStatus ??
           (entryForDate(entries, date) ? `Loaded entry for ${date}.` : `Editing entry for ${date}.`)
@@ -171,6 +167,19 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
     setStatus(`Saved ${selectedDate}.`);
   }
 
+  function resetForm() {
+    const hasSavedEntry = Boolean(entryForDate(entries, selectedDate));
+
+    setForm(createResetFormState(entries, selectedDate));
+    setStatus(
+      hasSavedEntry
+        ? `Reset form to the saved entry for ${selectedDate}.`
+        : isValidEntryDate(selectedDate)
+          ? `Reset form to defaults for ${selectedDate}.`
+          : 'Reset form to defaults. Choose a valid date before saving.'
+    );
+  }
+
   function exportJson() {
     const exported = storage.exportJson();
     setExportSource(exported);
@@ -192,7 +201,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
 
     storage.save(importPreview.acceptedEntries);
     setEntries(importPreview.acceptedEntries);
-    setForm(formFromEntry(importPreview.acceptedEntries, selectedDate));
+    setForm(createResetFormState(importPreview.acceptedEntries, selectedDate));
     setImportPreview(null);
     setStatus(`Imported ${importPreview.acceptedEntryCount} entries.`);
   }
@@ -350,9 +359,18 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
             </div>
           ) : null}
 
-          <button type="button" className="primary" onClick={saveEntry}>
-            {isValidEntryDate(selectedDate) ? `Save entry for ${selectedDate}` : 'Save entry'}
-          </button>
+          <div className="form-actions">
+            <button type="button" className="primary" onClick={saveEntry}>
+              {isValidEntryDate(selectedDate) ? `Save entry for ${selectedDate}` : 'Save entry'}
+            </button>
+            <button type="button" aria-describedby="reset-form-help" onClick={resetForm}>
+              Reset form
+            </button>
+          </div>
+          <p className="form-help" id="reset-form-help">
+            Restores the current form from saved data for this date, or defaults if none exists.
+            Reset only changes the form.
+          </p>
 
           <aside className="shortcut-help" aria-label="Date keyboard shortcuts">
             <h3>Shortcuts</h3>
@@ -578,17 +596,6 @@ function describedBy(
   const ids = [baseId, hint?.id].filter(Boolean);
 
   return ids.length > 0 ? ids.join(' ') : undefined;
-}
-
-function formFromEntry(entries: JournalEntry[], date: string): FormState {
-  const existing = entryForDate(entries, date);
-
-  return {
-    mood: existing?.mood ?? MOODS[0],
-    energy: String(existing?.energy ?? 3),
-    focus: String(existing?.focus ?? 3),
-    note: existing?.note ?? ''
-  };
 }
 
 function entryForDate(entries: JournalEntry[], date: string): JournalEntry | undefined {
