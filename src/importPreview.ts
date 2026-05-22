@@ -1,4 +1,4 @@
-import { normalizeEntries, type JournalEntry } from './journal';
+import { CURRENT_SCHEMA_VERSION, normalizeEntries, type JournalEntry } from './journal';
 
 export interface ImportDateRange {
   start: string;
@@ -14,6 +14,45 @@ export interface ImportPreview {
   replaceCount: number;
   addCount: number;
   summary: string;
+}
+
+export const IMPORT_DRY_RUN_CURRENT_ENTRIES: JournalEntry[] = [
+  {
+    date: '2026-05-20',
+    mood: 'calm',
+    energy: 3,
+    focus: 4,
+    note: 'Saved dry-run baseline',
+    schemaVersion: CURRENT_SCHEMA_VERSION
+  }
+];
+
+export const IMPORT_DRY_RUN_EXAMPLE_JSON = JSON.stringify(
+  {
+    schemaVersion: CURRENT_SCHEMA_VERSION,
+    entries: [
+      {
+        date: '2026-05-20',
+        mood: 'steady',
+        energy: 4,
+        focus: 4,
+        note: 'Dry-run replacement'
+      },
+      {
+        date: '2026-05-21',
+        mood: 'bright',
+        energy: 5,
+        focus: 5,
+        note: 'Dry-run new date'
+      }
+    ]
+  },
+  null,
+  2
+);
+
+export function createImportDryRunExamplePreview(): ImportPreview {
+  return previewJournalImport(IMPORT_DRY_RUN_EXAMPLE_JSON, IMPORT_DRY_RUN_CURRENT_ENTRIES);
 }
 
 export function previewJournalImport(

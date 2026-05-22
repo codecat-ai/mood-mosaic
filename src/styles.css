@@ -359,12 +359,27 @@ textarea {
   margin-bottom: 14px;
 }
 
-.import-preview {
+.import-preview,
+.dry-run-example {
   border: 1px solid #d7d3c8;
   border-radius: 8px;
   background: #f6f4ee;
   margin-top: 14px;
   padding: 14px;
+}
+
+.dry-run-example {
+  margin-bottom: 14px;
+}
+
+.dry-run-example h3 {
+  font-size: 1rem;
+  margin: 0 0 8px;
+}
+
+.dry-run-example p {
+  color: #5b675d;
+  margin-bottom: 10px;
 }
 
 .import-preview p {

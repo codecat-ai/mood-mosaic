@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { CURRENT_SCHEMA_VERSION, type JournalEntry } from './journal';
-import { previewJournalImport } from './importPreview';
+import {
+  IMPORT_DRY_RUN_CURRENT_ENTRIES,
+  IMPORT_DRY_RUN_EXAMPLE_JSON,
+  createImportDryRunExamplePreview,
+  previewJournalImport
+} from './importPreview';
 
 const existingEntries: JournalEntry[] = [
   {
@@ -14,6 +19,42 @@ const existingEntries: JournalEntry[] = [
 ];
 
 describe('import preview', () => {
+  it('provides a deterministic dry-run example with one replacement and one new date', () => {
+    const preview = createImportDryRunExamplePreview();
+
+    expect(IMPORT_DRY_RUN_EXAMPLE_JSON).toBe(
+      '{\n' +
+        '  "schemaVersion": 1,\n' +
+        '  "entries": [\n' +
+        '    {\n' +
+        '      "date": "2026-05-20",\n' +
+        '      "mood": "steady",\n' +
+        '      "energy": 4,\n' +
+        '      "focus": 4,\n' +
+        '      "note": "Dry-run replacement"\n' +
+        '    },\n' +
+        '    {\n' +
+        '      "date": "2026-05-21",\n' +
+        '      "mood": "bright",\n' +
+        '      "energy": 5,\n' +
+        '      "focus": 5,\n' +
+        '      "note": "Dry-run new date"\n' +
+        '    }\n' +
+        '  ]\n' +
+        '}'
+    );
+    expect(IMPORT_DRY_RUN_CURRENT_ENTRIES.map((entry) => entry.date)).toEqual(['2026-05-20']);
+    expect(preview).toMatchObject({
+      canProceed: true,
+      acceptedEntryCount: 2,
+      replaceCount: 1,
+      addCount: 1,
+      dateRange: { start: '2026-05-20', end: '2026-05-21' },
+      summary: 'Ready to import 2 entries from 2026-05-20 to 2026-05-21. 1 existing date will be replaced and 1 new date will be added.'
+    });
+    expect(preview.issues).toEqual([]);
+  });
+
   it('summarizes accepted entries before saved entries are replaced', () => {
     const preview = previewJournalImport(
       JSON.stringify({

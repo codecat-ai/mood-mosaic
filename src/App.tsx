@@ -16,7 +16,12 @@ import {
   type EntryValidationField,
   type EntryValidationHint
 } from './entryValidationHints';
-import { previewJournalImport, type ImportPreview } from './importPreview';
+import {
+  IMPORT_DRY_RUN_EXAMPLE_JSON,
+  createImportDryRunExamplePreview,
+  previewJournalImport,
+  type ImportPreview
+} from './importPreview';
 import {
   DEFAULT_REFLECTION_PROMPT_ID,
   REFLECTION_PROMPTS,
@@ -79,6 +84,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
       : `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} ready to export.`;
   const importGuidance =
     'Preview import safely before replacement. Browser data is not changed until you confirm.';
+  const importDryRunExample = useMemo(() => createImportDryRunExamplePreview(), []);
   const entryValidationHints = getEntryValidationHints({
     date: selectedDate,
     mood: form.mood,
@@ -475,6 +481,20 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
           <p className="backup-guidance" id="import-guidance">
             {importGuidance}
           </p>
+          <section className="dry-run-example" aria-labelledby="dry-run-example-heading">
+            <h3 id="dry-run-example-heading">Import dry-run example</h3>
+            <p>
+              Example dry run: pretend 2026-05-20 already exists, then preview this JSON to see
+              one replacement and one new date before any browser data changes.
+            </p>
+            <textarea
+              aria-label="Example dry-run JSON"
+              readOnly
+              value={IMPORT_DRY_RUN_EXAMPLE_JSON}
+              rows={8}
+            />
+            <p>{importDryRunExample.summary}</p>
+          </section>
           <label>
             Import JSON
             <textarea
