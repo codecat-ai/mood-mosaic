@@ -29,11 +29,13 @@ and export format may still evolve with documented migration paths.
   more reflection structure.
 - Keep the import dry-run example aligned with preview replacement and new-date
   counts as the import format evolves.
+- Keep the unsaved-change indicator accurate as save, reset, date switching,
+  and import workflows evolve.
 
 ## Next
 
-- Add a lightweight unsaved-change indicator when the current form differs from
-  the selected date's saved entry or default values.
+- Add compact export/import timestamps so users can tell when a backup was last
+  generated or a restore preview was last refreshed.
 
 ## Later
 
@@ -91,3 +93,6 @@ least two cadence reviews without major feature requests.
 - Reset unsaved form edits for the selected date back to its saved mood, energy,
   focus, and note, or back to default values when no entry exists, without
   mutating stored entries.
+- Show a lightweight unsaved-change indicator when the current form differs
+  from the selected date's saved entry or default values, and clear it after
+  save or reset.

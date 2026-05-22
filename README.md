@@ -23,6 +23,8 @@ turns small daily entries into a readable calendar mosaic and short summary.
   and `]` for the next saved date.
 - Reset unsaved form edits back to the selected date's saved entry, or to the
   default empty state when that date has no saved entry.
+- See a lightweight unsaved-change indicator while the form differs from that
+  date's saved entry or default state.
 - See lightweight entry-form hints for invalid dates, missing ratings, and notes
   close to the saved-entry length limit before pressing Save.
 - Choose an optional reflection prompt near the note field and append it as a
@@ -53,9 +55,11 @@ Open the local URL printed by Vite. Pick today's date or an older entry date,
 add mood, energy, focus, and note details, then use the mosaic and summary
 panels to review patterns. Lightweight hints appear beside the form if the
 selected date is invalid, a rating is outside 1-5, or the note is almost at the
-saved-entry limit. Use Reset form to discard unsaved edits for the selected
-date; it reloads that date's saved values or clears back to defaults if no entry
-exists, without changing stored entries. The optional Reflection prompt selector
+saved-entry limit. An Unsaved changes indicator appears when the current form
+differs from the selected date's saved entry or default values, then clears
+after Save or Reset form. Use Reset form to discard unsaved edits for the
+selected date; it reloads that date's saved values or clears back to defaults if
+no entry exists, without changing stored entries. The optional Reflection prompt selector
 can show a short mood, energy, focus, or next-step question, and its button
 appends the prompt to the note instead of overwriting text already typed. The
 Trend range control filters the snapshot, mosaic, recent entries, and copied
@@ -155,9 +159,9 @@ Tests cover validation and upsert behavior, entry hint behavior and
 accessibility wiring, recent-entry sorting and limits, analytics and mosaic
 sorting, storage import/export handling, import previews, legacy schema
 normalization, note prompt lookup and appending, date-based editing, trend
-filtering, unsaved-form reset behavior, and UI smoke flows. Write tests before
-changing behavior. Date shortcut behavior is covered by pure helper tests plus a
-UI status update test.
+filtering, unsaved-form reset behavior, unsaved-change detection, and UI smoke
+flows. Write tests before changing behavior. Date shortcut behavior is covered
+by pure helper tests plus a UI status update test.
 
 ## Roadmap
 
