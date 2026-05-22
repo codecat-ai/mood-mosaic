@@ -28,3 +28,18 @@ export function createResetFormState(entries: JournalEntry[], selectedDate: stri
     note: savedEntry.note
   };
 }
+
+export function hasUnsavedEntryFormChanges(
+  form: EntryFormState,
+  entries: JournalEntry[],
+  selectedDate: string
+): boolean {
+  const baseline = createResetFormState(entries, selectedDate);
+
+  return (
+    form.mood !== baseline.mood ||
+    form.energy !== baseline.energy ||
+    form.focus !== baseline.focus ||
+    form.note !== baseline.note
+  );
+}

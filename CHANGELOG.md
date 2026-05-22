@@ -4,6 +4,9 @@ All notable changes to Mood Mosaic will be documented in this file.
 
 ## Unreleased
 
+- Added a lightweight unsaved-change indicator that compares the current entry
+  form against the selected date's saved entry or default values and clears
+  after save or reset.
 - Added optional reflection prompts near the note field, including deterministic
   prompt helper tests and UI coverage for appending without replacing notes.
 

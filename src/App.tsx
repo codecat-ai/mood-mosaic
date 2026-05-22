@@ -16,7 +16,11 @@ import {
   type EntryValidationField,
   type EntryValidationHint
 } from './entryValidationHints';
-import { createResetFormState, type EntryFormState } from './formReset';
+import {
+  createResetFormState,
+  hasUnsavedEntryFormChanges,
+  type EntryFormState
+} from './formReset';
 import {
   IMPORT_DRY_RUN_EXAMPLE_JSON,
   createImportDryRunExamplePreview,
@@ -74,6 +78,7 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
   const copySummary = createCopySummary(trendEntries);
   const recentEntries = getRecentEntries(trendEntries);
   const selectedPrompt = getReflectionPrompt(selectedPromptId);
+  const hasUnsavedChanges = hasUnsavedEntryFormChanges(form, entries, selectedDate);
   const backupGuidance =
     entries.length === 0
       ? 'Save an entry before exporting a meaningful JSON backup. Empty exports are only useful for checking the file shape.'
@@ -251,6 +256,11 @@ export default function App({ storageTarget, today = currentDate() }: AppProps) 
               ? `Editing entry for ${selectedDate}`
               : 'Choose a valid date to edit'}
           </p>
+          {hasUnsavedChanges ? (
+            <p aria-label="Unsaved changes" className="unsaved-indicator" role="status">
+              Unsaved changes
+            </p>
+          ) : null}
 
           <label>
             Entry date

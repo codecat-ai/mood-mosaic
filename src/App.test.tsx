@@ -167,6 +167,32 @@ describe('App', () => {
     expect(window.localStorage.getItem('mood-mosaic:journal')).toBeNull();
   });
 
+  it('shows an accessible unsaved-change indicator after edits and clears it after save or reset', () => {
+    render(<App storageTarget={window.localStorage} today="2026-05-22" />);
+
+    expect(screen.queryByRole('status', { name: /unsaved changes/i })).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(/^note$/i), { target: { value: 'Draft note' } });
+
+    expect(screen.getByRole('status', { name: /unsaved changes/i })).toHaveTextContent(
+      /unsaved changes/i
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /save entry for 2026-05-22/i }));
+
+    expect(screen.queryByRole('status', { name: /unsaved changes/i })).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(/^note$/i), { target: { value: 'Another draft' } });
+
+    expect(screen.getByRole('status', { name: /unsaved changes/i })).toHaveTextContent(
+      /unsaved changes/i
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /reset form/i }));
+
+    expect(screen.queryByRole('status', { name: /unsaved changes/i })).not.toBeInTheDocument();
+  });
+
   it('saves an older selected date without replacing today and keeps the mosaic sorted', () => {
     render(<App storageTarget={window.localStorage} today="2026-05-21" />);
 
