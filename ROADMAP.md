@@ -36,9 +36,8 @@ and export format may still evolve with documented migration paths.
 
 ## Next
 
-- Add a compact restore decision note after import preview that explains whether
-  the preview will replace existing dates, add new dates, or both before users
-  confirm.
+- Add deterministic demo data and screenshot fixtures so documentation and
+  visual checks stay aligned as the UI changes.
 
 ## Later
 
@@ -85,6 +84,9 @@ least two cadence reviews without major feature requests.
   date, or the selected calendar month.
 - Preview a candidate import with accepted entry count, issues, date range,
   replacement count, and new-date count before any saved browser data changes.
+- Show a compact restore decision note near Confirm import that explains whether
+  the preview will replace existing dates, add new dates, or both before saved
+  browser data changes.
 - Show first-time backup guidance when there are no saved entries, switch to an
   export-ready entry count once data exists, and keep restore safety guidance
   associated with the import controls.

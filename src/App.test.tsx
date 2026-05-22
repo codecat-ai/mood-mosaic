@@ -122,6 +122,50 @@ describe('App', () => {
     ]);
   });
 
+  it('shows a read-only restore decision note before confirming a mixed pasted backup preview', () => {
+    seedEntries([
+      {
+        date: '2026-05-20',
+        mood: 'calm',
+        energy: 3,
+        focus: 3,
+        note: 'Keep until confirmed',
+        schemaVersion: 1
+      }
+    ]);
+
+    render(<App storageTarget={window.localStorage} today="2026-05-21" />);
+
+    fireEvent.change(screen.getByLabelText(/import json/i), {
+      target: {
+        value: JSON.stringify({
+          schemaVersion: 1,
+          entries: [
+            { date: '2026-05-20', mood: 'steady', energy: 4, focus: 4, note: 'Replace' },
+            { date: '2026-05-21', mood: 'bright', energy: 5, focus: 5, note: 'Add' }
+          ]
+        })
+      }
+    });
+    fireEvent.click(screen.getByRole('button', { name: /preview import/i }));
+
+    const preview = screen.getByLabelText(/import preview/i);
+    const decisionNote = within(preview).getByRole('note', { name: /restore decision/i });
+    const confirmButton = within(preview).getByRole('button', { name: /confirm import/i });
+
+    expect(decisionNote).toHaveTextContent(
+      /confirming restore will replace 1 existing date and add 1 new date/i
+    );
+    expect(decisionNote).not.toHaveAttribute('contenteditable');
+    expect(within(decisionNote).queryByRole('textbox')).not.toBeInTheDocument();
+    expect(
+      decisionNote.compareDocumentPosition(confirmButton) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(JSON.parse(window.localStorage.getItem('mood-mosaic:journal') ?? '{}').entries).toEqual([
+      expect.objectContaining({ date: '2026-05-20', note: 'Keep until confirmed' })
+    ]);
+  });
+
   it('defaults the editable entry date to today and announces the selected date', () => {
     render(<App storageTarget={window.localStorage} today="2026-05-21" />);
 

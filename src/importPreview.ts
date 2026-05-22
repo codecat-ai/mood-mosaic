@@ -88,6 +88,29 @@ export function previewJournalImport(
   };
 }
 
+export function formatRestoreDecisionNote(preview: ImportPreview): string {
+  if (preview.acceptedEntryCount === 0) {
+    const issueText =
+      preview.issues.length > 0
+        ? ` Resolve the preview ${pluralizeLabel(preview.issues.length, 'issue', 'issues')} before confirming.`
+        : '';
+
+    return `No entries are ready to restore yet.${issueText}`;
+  }
+
+  const replaceText =
+    preview.replaceCount > 0
+      ? `replace ${preview.replaceCount} existing ${pluralizeLabel(preview.replaceCount, 'date', 'dates')}`
+      : '';
+  const addText =
+    preview.addCount > 0
+      ? `add ${preview.addCount} new ${pluralizeLabel(preview.addCount, 'date', 'dates')}`
+      : '';
+  const decisionText = [replaceText, addText].filter(Boolean).join(' and ');
+
+  return `Confirming restore will ${decisionText}.`;
+}
+
 type ParseResult =
   | { ok: true; entriesSource: unknown[] }
   | { ok: false; issues: string[] };

@@ -4,6 +4,7 @@ import {
   IMPORT_DRY_RUN_CURRENT_ENTRIES,
   IMPORT_DRY_RUN_EXAMPLE_JSON,
   createImportDryRunExamplePreview,
+  formatRestoreDecisionNote,
   previewJournalImport
 } from './importPreview';
 
@@ -124,6 +125,64 @@ describe('import preview', () => {
     expect(preview.issues).toEqual(['Import must be a JSON object with an entries array.']);
     expect(preview.summary).toBe(
       'Import cannot proceed. Import must be a JSON object with an entries array.'
+    );
+  });
+
+  it('formats restore decision notes from preview counts', () => {
+    const replacementOnlyPreview = previewJournalImport(
+      JSON.stringify({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
+        entries: [
+          {
+            date: '2026-05-20',
+            mood: 'steady',
+            energy: 4,
+            focus: 4,
+            note: 'Replacement'
+          }
+        ]
+      }),
+      existingEntries
+    );
+    const newDatesOnlyPreview = previewJournalImport(
+      JSON.stringify({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
+        entries: [
+          {
+            date: '2026-05-21',
+            mood: 'bright',
+            energy: 5,
+            focus: 5,
+            note: 'New date'
+          }
+        ]
+      }),
+      existingEntries
+    );
+    const mixedPreview = createImportDryRunExamplePreview();
+    const emptyPreview = previewJournalImport(
+      JSON.stringify({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
+        entries: []
+      }),
+      existingEntries
+    );
+    const issueOnlyPreview = previewJournalImport('{nope', existingEntries);
+
+    expect(formatRestoreDecisionNote(replacementOnlyPreview)).toBe(
+      'Confirming restore will replace 1 existing date.'
+    );
+    expect(formatRestoreDecisionNote(newDatesOnlyPreview)).toBe(
+      'Confirming restore will add 1 new date.'
+    );
+    expect(formatRestoreDecisionNote(mixedPreview)).toBe(
+      'Confirming restore will replace 1 existing date and add 1 new date.'
+    );
+    expect(formatRestoreDecisionNote(emptyPreview)).toBe(
+      'No entries are ready to restore yet.'
+    );
+    expect(formatRestoreDecisionNote(issueOnlyPreview)).toBe(
+      'No entries are ready to restore yet. Resolve the preview issue before confirming.'
     );
   });
 });
