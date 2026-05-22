@@ -18,7 +18,8 @@ turns small daily entries into a readable calendar mosaic and short summary.
 - Add or update one entry per selected date with mood, energy, focus, and a short note.
 - See a sorted color mosaic, averages, mood counts, and streaks for all time,
   the selected Monday-Sunday week, or the selected calendar month.
-- Review recent entries in a compact keyboard-friendly list and jump straight into editing.
+- Search recent entries by date, mood, or note in a compact keyboard-friendly
+  list and jump straight into editing.
 - Use date shortcuts in the entry form: `T` for today, `[` for the previous saved date,
   and `]` for the next saved date.
 - Reset unsaved form edits back to the selected date's saved entry, or to the
@@ -66,10 +67,11 @@ can show a short mood, energy, focus, or next-step question, and its button
 appends the prompt to the note instead of overwriting text already typed. The
 Trend range control filters the snapshot, mosaic, recent entries, and copied
 summary to all time, the Monday-Sunday week containing the selected entry date,
-or the selected calendar month. Use the Recent entries list to load a recent day
-back into the form without using the date picker. Keyboard users can press `T`
-to jump to today, `[` to move to the previous saved date, and `]` to move to the
-next saved date when they are not typing in a field.
+or the selected calendar month. Use Search recent entries to narrow only that
+review list by date, mood, or note within the selected trend range, then load a
+recent day back into the form without using the date picker. Keyboard users can
+press `T` to jump to today, `[` to move to the previous saved date, and `]` to
+move to the next saved date when they are not typing in a field.
 
 ## Examples
 
@@ -124,8 +126,9 @@ accepted entries from `2026-05-20` to `2026-05-21`, with 1 existing date
 replaced and 1 new date added.
 
 Example review flow: save several days, pick This week or This month in Trend
-range, tab to Recent entries, then use an Edit button or the `[` and `]`
-shortcuts to load a date's mood, energy, focus, and note into the form.
+range, tab to Search recent entries, type part of a date, mood, or note, then
+use an Edit button or the `[` and `]` shortcuts to load a date's mood, energy,
+focus, and note into the form.
 
 Example backup/restore check: click Export JSON and confirm the backup panel
 shows when that payload was generated, then preview an import and confirm the
@@ -164,8 +167,8 @@ storage in `src/storage.ts`, and the React UI in `src/App.tsx`.
 ## Testing
 
 Tests cover validation and upsert behavior, entry hint behavior and
-accessibility wiring, recent-entry sorting and limits, analytics and mosaic
-sorting, storage import/export handling, import previews, legacy schema
+accessibility wiring, recent-entry sorting, limits, and search, analytics and
+mosaic sorting, storage import/export handling, import previews, legacy schema
 normalization, note prompt lookup and appending, date-based editing, trend
 filtering, unsaved-form reset behavior, unsaved-change detection, and UI smoke
 flows. Backup timestamp formatting is covered by deterministic pure helper

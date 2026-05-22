@@ -75,6 +75,7 @@ export default function App({
   const [importPreviewRefreshedAt, setImportPreviewRefreshedAt] = useState<string | null>(null);
   const [exportSource, setExportSource] = useState('');
   const [exportGeneratedAt, setExportGeneratedAt] = useState<string | null>(null);
+  const [recentSearchQuery, setRecentSearchQuery] = useState('');
   const [status, setStatus] = useState(
     initial.issues.length > 0 ? `Loaded with issues: ${initial.issues.join(' ')}` : 'Ready'
   );
@@ -84,7 +85,8 @@ export default function App({
   const summary = buildSummary(trendEntries);
   const cells = buildMosaicCells(trendEntries);
   const copySummary = createCopySummary(trendEntries);
-  const recentEntries = getRecentEntries(trendEntries);
+  const recentEntries = getRecentEntries(trendEntries, undefined, recentSearchQuery);
+  const trimmedRecentSearchQuery = recentSearchQuery.trim();
   const selectedPrompt = getReflectionPrompt(selectedPromptId);
   const hasUnsavedChanges = hasUnsavedEntryFormChanges(form, entries, selectedDate);
   const backupGuidance =
@@ -471,8 +473,19 @@ export default function App({
 
           <section className="recent-entries" aria-labelledby="recent-entries-heading">
             <h2 id="recent-entries-heading">Recent entries</h2>
+            <label className="recent-search">
+              Search recent entries
+              <input
+                type="search"
+                value={recentSearchQuery}
+                onChange={(event) => setRecentSearchQuery(event.target.value)}
+                placeholder="Date, mood, or note"
+              />
+            </label>
             {recentEntries.length === 0 ? (
-              <p className="empty-state">{emptyRecentMessage(trend.mode)}</p>
+              <p className="empty-state">
+                {emptyRecentMessage(trend.mode, trimmedRecentSearchQuery)}
+              </p>
             ) : (
               <ul>
                 {recentEntries.map((entry) => (
@@ -658,7 +671,11 @@ function emptyTrendMessage(mode: TrendFilterMode): string {
   return 'No entries yet.';
 }
 
-function emptyRecentMessage(mode: TrendFilterMode): string {
+function emptyRecentMessage(mode: TrendFilterMode, searchQuery = ''): string {
+  if (searchQuery.length > 0) {
+    return `No recent entries match "${searchQuery}".`;
+  }
+
   if (mode === 'week') {
     return 'No entries in this week window.';
   }

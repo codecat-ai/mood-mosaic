@@ -68,6 +68,32 @@ describe('getRecentEntries', () => {
     expect(input).toEqual(snapshot);
     expect(result[0]).not.toBe(input[1]);
   });
+
+  it('filters by date, mood, or note before sorting and limiting', () => {
+    const manyEntries = [
+      entry('2026-05-15', 'calm', 3, 3, 'Old matching note'),
+      entry('2026-05-16', 'steady', 3, 3, 'Routine'),
+      entry('2026-05-17', 'bright', 3, 3, 'Routine'),
+      entry('2026-05-18', 'focused', 3, 3, 'Routine'),
+      entry('2026-05-19', 'calm', 3, 3, 'Routine'),
+      entry('2026-05-20', 'steady', 3, 3, 'Routine'),
+      entry('2026-05-21', 'focused', 3, 3, 'Routine')
+    ];
+
+    expect(getRecentEntries(manyEntries, 5, 'OLD MATCH').map((item) => item.date)).toEqual([
+      '2026-05-15'
+    ]);
+    expect(getRecentEntries(manyEntries, 5, 'bright').map((item) => item.date)).toEqual([
+      '2026-05-17'
+    ]);
+    expect(getRecentEntries(manyEntries, 5, '05-20').map((item) => item.date)).toEqual([
+      '2026-05-20'
+    ]);
+  });
+
+  it('treats blank search as the existing recent-entry list', () => {
+    expect(getRecentEntries(entries, 2, '   ')).toEqual(getRecentEntries(entries, 2));
+  });
 });
 
 function entry(

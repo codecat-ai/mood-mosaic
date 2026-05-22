@@ -332,6 +332,10 @@ textarea {
   margin-bottom: 10px;
 }
 
+.recent-search {
+  margin-bottom: 12px;
+}
+
 .recent-entries ul {
   display: grid;
   gap: 10px;
