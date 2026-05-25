@@ -143,6 +143,13 @@ sanity check, then preview an import and confirm the restore preview shows when
 it was refreshed and whether confirming will replace existing dates, add new
 dates, or both before any saved entries change.
 
+Demo screenshot fixture: `src/demoFixtures.ts` exports deterministic journal
+entries plus `buildDemoScreenshotChecklist()`, a pure formatter for documentation
+and visual checks. It reports the stable title, date range, entry count,
+recommended UI states, and escaped/redacted note previews, so maintainers can
+keep screenshots and README examples aligned without a dev server or browser
+automation.
+
 ## Configuration
 
 There is no account, server, or cloud configuration. Data is stored in browser
@@ -173,6 +180,7 @@ npm run build
 The core model lives in `src/journal.ts`, entry hint logic in
 `src/entryValidationHints.ts`, optional note prompt logic in
 `src/notePrompts.ts`, deterministic form reset logic in `src/formReset.ts`,
+demo screenshot fixtures in `src/demoFixtures.ts`,
 recent-entry selection in `src/recentEntries.ts`, import preview logic in
 `src/importPreview.ts`, backup sanity-check logic in `src/backupSanityCheck.ts`,
 analytics and trend filtering in `src/summary.ts`, storage in `src/storage.ts`,
@@ -190,7 +198,8 @@ covered by deterministic pure helper tests and injected-clock UI tests. Restore
 decision notes are covered by pure helper tests and UI tests that confirm
 previews do not mutate storage before confirmation. Write tests before changing
 behavior. Date shortcut behavior is covered by pure helper tests plus a UI
-status update test.
+status update test. Demo fixture tests cover deterministic entries, date ranges,
+note-preview safety, truncation, and clone-safety.
 
 ## Roadmap
 

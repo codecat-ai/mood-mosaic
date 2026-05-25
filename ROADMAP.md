@@ -36,8 +36,8 @@ and export format may still evolve with documented migration paths.
 
 ## Next
 
-- Add deterministic demo data and screenshot fixtures so documentation and
-  visual checks stay aligned as the UI changes.
+- Add richer Markdown and printable reflection exports so saved summaries are
+  easier to share outside the browser while keeping notes normalized.
 
 ## Later
 
@@ -109,3 +109,6 @@ least two cadence reviews without major feature requests.
   save or reset.
 - Show compact generated and refreshed timestamps after exporting a backup or
   previewing a restore, without writing those timestamps into journal entries.
+- Use deterministic demo data and a pure screenshot checklist formatter so
+  documentation examples and visual checks can stay aligned without a dev
+  server or browser automation.
