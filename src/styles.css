@@ -229,6 +229,13 @@ textarea {
   gap: 16px;
 }
 
+.panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .panel-heading p {
   color: #5b675d;
   margin-bottom: 0;
@@ -492,5 +499,11 @@ textarea {
   .recent-entries li,
   .trend-controls {
     grid-template-columns: 1fr;
+  }
+
+  .panel-heading,
+  .panel-actions {
+    display: grid;
+    justify-content: stretch;
   }
 }

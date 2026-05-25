@@ -629,6 +629,115 @@ describe('App', () => {
     await screen.findByText(/copied reflection summary/i);
   });
 
+  it('copies rich Markdown for the current trend window through an injected adapter', async () => {
+    const copyText = vi.fn().mockResolvedValue(undefined);
+    seedEntries([
+      {
+        date: '2026-05-17',
+        mood: 'stressed',
+        energy: 1,
+        focus: 1,
+        note: 'Previous week',
+        schemaVersion: 1
+      },
+      {
+        date: '2026-05-18',
+        mood: 'steady',
+        energy: 2,
+        focus: 2,
+        note: 'Week **start**',
+        schemaVersion: 1
+      },
+      {
+        date: '2026-05-21',
+        mood: 'focused',
+        energy: 5,
+        focus: 4,
+        note: 'Anchor <week>',
+        schemaVersion: 1
+      }
+    ]);
+
+    render(
+      <App storageTarget={window.localStorage} today="2026-05-21" copyText={copyText} />
+    );
+    fireEvent.change(screen.getByLabelText(/trend range/i), { target: { value: 'week' } });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /copy markdown/i }));
+    });
+
+    expect(copyText).toHaveBeenCalledTimes(1);
+    expect(copyText.mock.calls[0][0]).toContain('# Mood Mosaic Reflection');
+    expect(copyText.mock.calls[0][0]).toContain('Range: This week: 2026\\-05\\-18');
+    expect(copyText.mock.calls[0][0]).toContain('Week \\*\\*start\\*\\*');
+    expect(copyText.mock.calls[0][0]).toContain('Anchor &lt;week&gt;');
+    expect(copyText.mock.calls[0][0]).not.toContain('Previous week');
+    await screen.findByText(/copied markdown reflection export/i);
+  });
+
+  it('prints the current filtered summary through an injected adapter', () => {
+    const printHtml = vi.fn().mockReturnValue(true);
+    seedEntries([
+      {
+        date: '2026-04-30',
+        mood: 'tired',
+        energy: 1,
+        focus: 1,
+        note: 'Previous month',
+        schemaVersion: 1
+      },
+      {
+        date: '2026-05-02',
+        mood: 'calm',
+        energy: 3,
+        focus: 4,
+        note: 'Month note',
+        schemaVersion: 1
+      }
+    ]);
+
+    render(
+      <App storageTarget={window.localStorage} today="2026-05-21" printHtml={printHtml} />
+    );
+    fireEvent.change(screen.getByLabelText(/trend range/i), { target: { value: 'month' } });
+    fireEvent.click(screen.getByRole('button', { name: /print summary/i }));
+
+    expect(printHtml).toHaveBeenCalledTimes(1);
+    expect(printHtml.mock.calls[0][0]).toContain('<title>Mood Mosaic Reflection</title>');
+    expect(printHtml.mock.calls[0][0]).toContain('This month: May 2026');
+    expect(printHtml.mock.calls[0][0]).toContain('Month note');
+    expect(printHtml.mock.calls[0][0]).not.toContain('Previous month');
+    expect(screen.getByRole('status', { name: /^app status$/i })).toHaveTextContent(
+      /opened printable reflection summary/i
+    );
+  });
+
+  it('reports when printable summary output is blocked', () => {
+    const printHtml = vi.fn().mockReturnValue(false);
+    seedEntries([
+      {
+        date: '2026-05-02',
+        mood: 'calm',
+        energy: 3,
+        focus: 4,
+        note: 'Month note',
+        schemaVersion: 1
+      }
+    ]);
+
+    render(
+      <App storageTarget={window.localStorage} today="2026-05-21" printHtml={printHtml} />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /print summary/i }));
+
+    expect(printHtml).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('status', { name: /^app status$/i })).toHaveTextContent(
+      /print window was blocked/i
+    );
+  });
+
   it('filters only recent entries by search within the selected trend window', async () => {
     const clipboardWrite = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, { clipboard: { writeText: clipboardWrite } });
