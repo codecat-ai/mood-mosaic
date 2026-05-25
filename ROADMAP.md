@@ -33,11 +33,13 @@ and export format may still evolve with documented migration paths.
   and import workflows evolve.
 - Keep recent-entry search clear and scoped to review so it does not change
   summaries, mosaic cells, copied reflections, or stored data.
+- Keep Markdown and printable reflection exports aligned with trend filters,
+  note normalization, and accessibility expectations.
 
 ## Next
 
-- Add richer Markdown and printable reflection exports so saved summaries are
-  easier to share outside the browser while keeping notes normalized.
+- Add accessibility and browser smoke checks for the main local-first workflows
+  so launch hardening catches regressions beyond unit and jsdom coverage.
 
 ## Later
 
@@ -112,3 +114,7 @@ least two cadence reviews without major feature requests.
 - Use deterministic demo data and a pure screenshot checklist formatter so
   documentation examples and visual checks can stay aligned without a dev
   server or browser automation.
+- Copy normalized Markdown reflection exports and open printable reflection
+  summaries for the selected trend range, with escaped user notes, bounded note
+  previews, empty-state output, and UI adapters that can be tested without real
+  clipboard or print windows.

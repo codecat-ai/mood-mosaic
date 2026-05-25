@@ -9,6 +9,9 @@ All notable changes to Mood Mosaic will be documented in this file.
   after save or reset.
 - Added optional reflection prompts near the note field, including deterministic
   prompt helper tests and UI coverage for appending without replacing notes.
+- Added deterministic Markdown and printable reflection exports for the selected
+  trend range, with normalized and escaped notes plus testable copy/print UI
+  adapters.
 
 ## 0.1.0 - 2026-05-21
 

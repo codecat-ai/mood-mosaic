@@ -44,6 +44,7 @@ import {
   filterEntriesByTrend,
   type TrendFilterMode
 } from './summary';
+import { createPrintableReflectionHtml, createReflectionMarkdown } from './reflectionExports';
 import { createJournalStorage } from './storage';
 import './styles.css';
 
@@ -53,12 +54,16 @@ interface AppProps {
   storageTarget?: Storage;
   today?: string;
   now?: () => Date;
+  copyText?: (value: string) => Promise<void>;
+  printHtml?: (value: string) => boolean;
 }
 
 export default function App({
   storageTarget,
   today = currentDate(),
-  now = () => new Date()
+  now = () => new Date(),
+  copyText = defaultCopyText,
+  printHtml = defaultPrintHtml
 }: AppProps) {
   const storage = useMemo(
     () => createJournalStorage(storageTarget ?? window.localStorage),
@@ -87,6 +92,14 @@ export default function App({
   const summary = buildSummary(trendEntries);
   const cells = buildMosaicCells(trendEntries);
   const copySummary = createCopySummary(trendEntries);
+  const reflectionMarkdown = createReflectionMarkdown({
+    rangeLabel: trend.label,
+    entries: trendEntries
+  });
+  const printableReflectionHtml = createPrintableReflectionHtml({
+    rangeLabel: trend.label,
+    entries: trendEntries
+  });
   const recentEntries = getRecentEntries(trendEntries, undefined, recentSearchQuery);
   const trimmedRecentSearchQuery = recentSearchQuery.trim();
   const selectedPrompt = getReflectionPrompt(selectedPromptId);
@@ -235,12 +248,32 @@ export default function App({
 
   async function copyReflectionSummary() {
     try {
-      await navigator.clipboard?.writeText(copySummary);
+      await copyText(copySummary);
       setStatus('Copied reflection summary.');
     } catch {
       setExportSource(copySummary);
       setStatus('Summary ready to copy from the export box.');
     }
+  }
+
+  async function copyMarkdownReflection() {
+    try {
+      await copyText(reflectionMarkdown);
+      setStatus('Copied Markdown reflection export.');
+    } catch {
+      setExportSource(reflectionMarkdown);
+      setStatus('Markdown export ready to copy from the export box.');
+    }
+  }
+
+  function printReflectionSummary() {
+    const didOpenPrintWindow = printHtml(printableReflectionHtml);
+
+    setStatus(
+      didOpenPrintWindow
+        ? 'Opened printable reflection summary.'
+        : 'Print window was blocked. Copy Markdown or export JSON instead.'
+    );
   }
 
   function useSelectedPrompt() {
@@ -420,9 +453,17 @@ export default function App({
               <h2 id="mosaic-heading">Mosaic</h2>
               <p>Trend anchored to selected entry date {selectedDate || 'none'}.</p>
             </div>
-            <button type="button" onClick={copyReflectionSummary}>
-              Copy summary
-            </button>
+            <div className="panel-actions" aria-label="Reflection export actions">
+              <button type="button" onClick={copyReflectionSummary}>
+                Copy summary
+              </button>
+              <button type="button" onClick={copyMarkdownReflection}>
+                Copy Markdown
+              </button>
+              <button type="button" onClick={printReflectionSummary}>
+                Print summary
+              </button>
+            </div>
           </div>
 
           <div className="trend-controls">
@@ -768,6 +809,30 @@ function trendStatusCount(countLabel: string): string {
 
 function currentDate(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+async function defaultCopyText(value: string): Promise<void> {
+  if (!navigator.clipboard?.writeText) {
+    throw new Error('Clipboard is unavailable.');
+  }
+
+  await navigator.clipboard.writeText(value);
+}
+
+function defaultPrintHtml(value: string): boolean {
+  const printWindow = window.open('', '_blank', 'noopener,noreferrer');
+
+  if (!printWindow) {
+    return false;
+  }
+
+  printWindow.document.open();
+  printWindow.document.write(value);
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+
+  return true;
 }
 
 function shortcutTargetFromEvent(target: EventTarget | null) {

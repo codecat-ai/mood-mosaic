@@ -30,7 +30,10 @@ turns small daily entries into a readable calendar mosaic and short summary.
   close to the saved-entry length limit before pressing Save.
 - Choose an optional reflection prompt near the note field and append it as a
   starter without replacing existing note text.
-- Copy a concise reflection summary for a journal, coach, or check-in.
+- Copy a concise reflection summary or richer normalized Markdown export for a
+  journal, coach, or check-in.
+- Open a printable reflection summary for the currently selected trend range,
+  with escaped notes and deterministic export text.
 - Export JSON backups with first-time guidance, a dry-run import example, and
   a pasted-JSON sanity check before previews replace browser data.
 - See compact generated and refreshed timestamps after exporting a backup or
@@ -67,11 +70,15 @@ selected date; it reloads that date's saved values or clears back to defaults if
 no entry exists, without changing stored entries. The optional Reflection prompt selector
 can show a short mood, energy, focus, or next-step question, and its button
 appends the prompt to the note instead of overwriting text already typed. The
-Trend range control filters the snapshot, mosaic, recent entries, and copied
-summary to all time, the Monday-Sunday week containing the selected entry date,
-or the selected calendar month. Use Search recent entries to narrow only that
-review list by date, mood, or note within the selected trend range, then load a
-recent day back into the form without using the date picker. Keyboard users can
+Trend range control filters the snapshot, mosaic, recent entries, copied
+summary, Markdown export, and printable summary to all time, the Monday-Sunday
+week containing the selected entry date, or the selected calendar month. Use
+Search recent entries to narrow only that review list by date, mood, or note
+within the selected trend range, then load a recent day back into the form
+without using the date picker. Copy Markdown creates a normalized reflection
+export with date range, counts, averages, and escaped notes for sharing outside
+the browser; Print summary opens the same selected range in a print-ready view.
+Keyboard users can
 press `T` to jump to today, `[` to move to the previous saved date, and `]` to
 move to the next saved date when they are not typing in a field.
 When you paste backup JSON into the import box, a read-only Backup sanity check
@@ -137,6 +144,12 @@ range, tab to Search recent entries, type part of a date, mood, or note, then
 use an Edit button or the `[` and `]` shortcuts to load a date's mood, energy,
 focus, and note into the form.
 
+Example reflection export flow: choose This week in Trend range, click Copy
+Markdown to place a normalized Markdown summary on the clipboard, or click Print
+summary to open a printable version of the same filtered entries. Notes are
+whitespace-normalized, bounded, and escaped so Markdown punctuation and
+HTML-like text remain readable as user-provided content.
+
 Example backup/restore check: click Export JSON and confirm the backup panel
 shows when that payload was generated, paste import JSON and review the Backup
 sanity check, then preview an import and confirm the restore preview shows when
@@ -183,8 +196,9 @@ The core model lives in `src/journal.ts`, entry hint logic in
 demo screenshot fixtures in `src/demoFixtures.ts`,
 recent-entry selection in `src/recentEntries.ts`, import preview logic in
 `src/importPreview.ts`, backup sanity-check logic in `src/backupSanityCheck.ts`,
-analytics and trend filtering in `src/summary.ts`, storage in `src/storage.ts`,
-and the React UI in `src/App.tsx`.
+reflection export formatting in `src/reflectionExports.ts`, analytics and trend
+filtering in `src/summary.ts`, storage in `src/storage.ts`, and the React UI in
+`src/App.tsx`.
 
 ## Testing
 
@@ -193,13 +207,16 @@ accessibility wiring, recent-entry sorting, limits, and search, analytics and
 mosaic sorting, storage import/export handling, import previews, legacy schema
 normalization, backup sanity checks, note prompt lookup and appending,
 date-based editing, trend filtering, unsaved-form reset behavior,
-unsaved-change detection, and UI smoke flows. Backup timestamp formatting is
+unsaved-change detection, reflection Markdown/print formatting, and UI smoke
+flows. Backup timestamp formatting is
 covered by deterministic pure helper tests and injected-clock UI tests. Restore
 decision notes are covered by pure helper tests and UI tests that confirm
 previews do not mutate storage before confirmation. Write tests before changing
 behavior. Date shortcut behavior is covered by pure helper tests plus a UI
 status update test. Demo fixture tests cover deterministic entries, date ranges,
-note-preview safety, truncation, and clone-safety.
+note-preview safety, truncation, and clone-safety. Reflection export tests cover
+Markdown punctuation, HTML-like note text, empty exports, truncation bounds, and
+filtered subset behavior.
 
 ## Roadmap
 
